@@ -3,165 +3,557 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | TsunamiShield AI</title>
+    <title>TsunamiShield AI | Intelligence Command Center</title>
     
-    <!-- Google Fonts -->
+    <!-- Google Fonts: Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- Leaflet Mapping -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css">
-    
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <link rel="manifest" href="manifest.json">
-</head>
-<body class="dark-theme">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            --bg-deep: #020617;
+            --bg-card: rgba(15, 23, 42, 0.7);
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --emergency-red: #ef4444;
+            --safe-green: #10b981;
+            --warning-amber: #f59e0b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glow-blue: 0 0 20px rgba(59, 130, 246, 0.3);
+            --glow-red: 0 0 30px rgba(239, 68, 68, 0.5);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-    <!-- Sidebar Navigation -->
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: var(--bg-deep);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 280px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+            z-index: 100;
+        }
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            padding-left: 10px;
+        }
+
+        .logo-box i { color: var(--accent-blue); }
+        .logo-box h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -1px; }
+        .logo-box span { color: var(--accent-cyan); }
+
+        .nav-list { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            color: var(--text-dim);
+            text-decoration: none;
+            border-radius: 14px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            box-shadow: var(--glow-blue);
+        }
+
+        .sys-status-pill {
+            margin-top: auto;
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .status-header { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 5px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--safe-green); box-shadow: 0 0 10px var(--safe-green); }
+        .status-text { font-weight: 700; font-size: 1rem; color: var(--safe-green); }
+
+        /* Main Screen */
+        .main-viewport {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .top-nav {
+            height: 80px;
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(2, 6, 23, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .clock-box { font-size: 1.2rem; font-weight: 600; color: var(--text-main); }
+        
+        .action-btns { display: flex; gap: 15px; }
+        .btn {
+            padding: 10px 22px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-disaster {
+            background: linear-gradient(135deg, #ef4444, #991b1b);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+        .btn-disaster:hover { transform: translateY(-2px); box-shadow: var(--glow-red); }
+
+        .btn-outline { background: transparent; border: 1px solid var(--glass-border); color: var(--text-main); }
+        .btn-outline:hover { background: rgba(255,255,255,0.05); }
+
+        /* Dashboard Content */
+        .content-scroll {
+            flex: 1;
+            padding: 30px 40px;
+            overflow-y: auto;
+        }
+
+        .header-hero { margin-bottom: 30px; }
+        .header-hero h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: 5px; }
+        .header-hero p { color: var(--text-dim); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            padding: 25px;
+            border-radius: 24px;
+            backdrop-filter: blur(16px);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover { border-color: var(--accent-blue); transform: translateY(-5px); box-shadow: var(--glow-blue); }
+        .stat-card::before { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background: radial-gradient(circle at top right, rgba(59,130,246,0.1), transparent); pointer-events: none; }
+
+        .label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .value { font-size: 2rem; font-weight: 800; margin-top: 5px; display: block; }
+        .trend { font-size: 0.8rem; color: var(--safe-green); margin-top: 5px; display: flex; align-items: center; gap: 4px; }
+
+        /* Intelligence Area */
+        .panel-grid {
+            display: grid;
+            grid-template-columns: 2.5fr 1fr;
+            gap: 20px;
+            height: 550px;
+        }
+
+        .map-box {
+            background: #000;
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #map { height: 100%; width: 100%; }
+
+        .map-overlay-banner {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            padding: 12px 24px;
+            border-radius: 16px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            font-weight: 800;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .log-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .log-box {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 24px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .log-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding-right: 10px;
+        }
+
+        .log-entry {
+            background: rgba(255,255,255,0.03);
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-size: 0.85rem;
+            border-left: 4px solid var(--accent-blue);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+        .log-entry.critical { border-left-color: var(--emergency-red); background: rgba(239, 68, 68, 0.05); }
+        .log-time { font-size: 0.7rem; color: var(--text-dim); margin-bottom: 4px; display: block; }
+
+        .mini-chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 20px;
+            height: 180px;
+        }
+
+        /* Animations */
+        .pulse { animation: pulse-anim 2s infinite; }
+        @keyframes pulse-anim {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .blink-red { animation: blink-bg 1s infinite alternate; }
+        @keyframes blink-bg {
+            from { background: rgba(239, 68, 68, 0.2); }
+            to { background: rgba(239, 68, 68, 0.6); }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
     <aside class="sidebar">
-        <div class="logo-section">
-            <i data-lucide="waves" color="#3b82f6" size="32"></i>
+        <div class="logo-box">
+            <i data-lucide="waves" size="32"></i>
             <h1>Tsunami<span>Shield</span></h1>
         </div>
 
-        <nav class="nav-menu">
-            <a href="dashboard.html" class="nav-item">
+        <nav class="nav-list">
+            <a href="index.html" class="nav-link active">
                 <i data-lucide="layout-dashboard"></i> <span>Dashboard</span>
             </a>
-            <a href="alerts.html" class="nav-item">
-                <i data-lucide="bell"></i> <span>Alerts</span>
+            <a href="alerts.html" class="nav-link">
+                <i data-lucide="bell"></i> <span>Live Alerts</span>
             </a>
-            <a href="risk-map.html" class="nav-item">
-                <i data-lucide="map"></i> <span>Risk Map</span>
+            <a href="risk-map.html" class="nav-link">
+                <i data-lucide="map"></i> <span>Risk Mapping</span>
             </a>
-            <a href="evacuation.html" class="nav-item">
+            <a href="evacuation.html" class="nav-link">
                 <i data-lucide="move-up-right"></i> <span>Evacuation</span>
             </a>
-            <a href="shelters.html" class="nav-item">
-                <i data-lucide="home"></i> <span>Shelters</span>
+            <a href="shelters.html" class="nav-link">
+                <i data-lucide="home"></i> <span>Safe Shelters</span>
             </a>
-            <a href="analytics.html" class="nav-item">
-                <i data-lucide="bar-chart-big"></i> <span>Analytics</span>
-            </a>
-            <a href="community.html" class="nav-item">
-                <i data-lucide="users"></i> <span>Community</span>
-            </a>
-            <a href="preparedness.html" class="nav-item">
-                <i data-lucide="shield-check"></i> <span>Preparedness</span>
-            </a>
-            <a href="admin.html" class="nav-item">
-                <i data-lucide="lock"></i> <span>Admin Panel</span>
+            <a href="analytics.html" class="nav-link">
+                <i data-lucide="bar-chart-3"></i> <span>Big Data</span>
             </a>
         </nav>
 
-        <div style="padding: 20px 25px;">
-            <div class="status-indicator">
-                <span class="status-dot green" id="status-dot"></span>
-                <span id="status-text">System Online</span>
+        <div class="sys-status-pill">
+            <div class="status-header">
+                <div class="status-dot" id="dot"></div>
+                <span>CONTROL SYSTEM</span>
             </div>
-            <div id="connectivity-badge" class="hidden" style="margin-top:5px; color:var(--emergency-red); font-size:0.7rem;">OFFLINE MODE ACTIVE</div>
+            <div class="status-text" id="status-txt">NOMINAL MODE</div>
         </div>
     </aside>
 
-    <div class="main-wrapper">
-        <!-- Top Navigation Bar -->
-        <header class="top-bar">
-            <button class="menu-toggle" id="mobile-menu-btn">
-                <i data-lucide="menu"></i>
-            </button>
-            <div class="search-box">
-                <i data-lucide="search" size="18" color="#94a3b8"></i>
-                <input type="text" placeholder="Search coastal sectors...">
-            </div>
-            
-            <div class="system-meta">
-                <div id="offline-banner" class="offline-status-bar">
-                    <i data-lucide="wifi-off"></i> <span>LOCAL MODE</span>
-                </div>
-                <div class="current-time" id="clock">00:00:00 AM</div>
-                <button class="btn btn-primary">
-                    <i data-lucide="phone"></i> <span>SOS Hotline</span>
+    <!-- MAIN VIEWPORT -->
+    <main class="main-viewport">
+        <header class="top-nav">
+            <div class="clock-box" id="clock">09:44:33 AM</div>
+            <div class="action-btns">
+                <button class="btn btn-outline">
+                    <i data-lucide="settings"></i> System Config
+                </button>
+                <button class="btn btn-disaster" onclick="simulateDisaster()">
+                    <i data-lucide="zap"></i> Simulate Disaster
                 </button>
             </div>
         </header>
 
-        <!-- Main Dashboard Operations -->
-        <main class="dashboard-content">
-            <div class="hero-section">
-                <h2>Tsunami Intelligence Dashboard</h2>
-                <p>Advanced real-time monitoring and autonomous crisis coordination.</p>
+        <div class="content-scroll">
+            <div class="header-hero">
+                <h2>Intelligence Control Center</h2>
+                <p>Monitoring Chennai Coastal Sector with real-time AI surveillance.</p>
             </div>
 
+            <!-- Stats Grid -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <span class="stat-label">Critical Risk Level</span>
-                    <span class="stat-value risk-value" id="risk-val" style="color:var(--safe-green);">LOW</span>
+                    <span class="label">Threat Level</span>
+                    <span class="value" id="risk-display" style="color: var(--safe-green);">LOW</span>
+                    <div class="trend"><i data-lucide="trending-down" size="14"></i> -2.4% vs prev hr</div>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Active Alerts</span>
-                    <span class="stat-value" id="active-alerts-count">0</span>
+                    <span class="label">Active Alerts</span>
+                    <span class="value" id="alert-count">0</span>
+                    <div class="trend" style="color: var(--text-dim);">Live Sensors Syncing</div>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Safe Shelters</span>
-                    <span class="stat-value" id="safe-shelters-count">12</span>
+                    <span class="label">Safe Shelters</span>
+                    <span class="value" id="shelter-count">14</span>
+                    <div class="trend" style="color: var(--accent-cyan);">98% Capacity Available</div>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Time to Impact</span>
-                    <span class="stat-value" id="impact-timer" style="color:var(--accent-blue);">00:00:00</span>
+                    <span class="label">Time to Impact</span>
+                    <span class="value" id="timer-display" style="color: var(--accent-blue);">00:00:00</span>
+                    <div class="trend" style="color: var(--text-dim);">No Anomaly Detected</div>
                 </div>
             </div>
 
-            <div class="grid-main">
-                <div class="map-container">
+            <!-- Intelligence Panel -->
+            <div class="panel-grid">
+                <!-- Map -->
+                <div class="map-box">
                     <div id="map"></div>
-                    <div id="alert-banner" class="alert-banner safe" style="position:absolute; top:20px; left:20px; z-index:1000; padding:10px 20px; border-radius:10px; backdrop-filter:blur(10px);">SAFE</div>
+                    <div class="map-overlay-banner" id="map-banner">
+                        <i data-lucide="shield-check" color="var(--safe-green)"></i>
+                        <span id="banner-text">SYSTEM SECURED</span>
+                    </div>
                 </div>
 
-                <div class="notification-panel">
-                    <div class="notif-header">
-                        <h3><i data-lucide="activity"></i> System Logs</h3>
-                    </div>
-                    <div class="notif-list" id="notif-list">
-                        <div class="notif-entry system">
-                            <span class="time">SECURE</span>
-                            <p>Monitoring initialized. No seismic anomalies.</p>
+                <!-- Right Side Panels -->
+                <div class="log-panel">
+                    <div class="log-box">
+                        <div class="log-header">
+                            <h3>Real-time Logs</h3>
+                            <span style="font-size: 0.7rem; color: var(--accent-blue); font-weight: 800;">LIVE FEED</span>
+                        </div>
+                        <div class="log-list" id="log-list">
+                            <div class="log-entry">
+                                <span class="log-time">09:40:01 AM</span>
+                                <p>Satellite connection established.</p>
+                            </div>
+                            <div class="log-entry">
+                                <span class="log-time">09:40:15 AM</span>
+                                <p>Ocean floor sensors broadcasting...</p>
+                            </div>
                         </div>
                     </div>
+
+                    <div class="mini-chart-card">
+                        <span class="label">Seismic Trend Analysis</span>
+                        <canvas id="dashboardChart"></canvas>
+                    </div>
                 </div>
             </div>
-
-            <div class="feature-grid" style="margin-top: 30px;">
-                <a href="analytics.html" class="feature-card" style="text-decoration:none;">
-                    <div class="feature-icon"><i data-lucide="zap"></i></div>
-                    <h3>AI Risk Multiplier</h3>
-                    <p>Correlate magnitude and tide for weighted threat scoring.</p>
-                </a>
-                <div class="feature-card">
-                    <div class="feature-icon"><i data-lucide="play-circle"></i></div>
-                    <h3>Manual Simulation</h3>
-                    <input type="range" id="waveSlider" min="1" max="10" value="3" style="width:100%; margin-top:10px;">
-                    <span style="font-size:0.7rem;">Height: <b id="wave-val">3m</b></span>
-                    <button class="btn btn-primary full-width" id="simulateBtn" style="font-size:0.7rem; margin-top:10px;">EXECUTE</button>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Hidden legacy data bus -->
-    <div style="display:none;">
-        <span id="live-wave">--</span><button id="fetch-ocean-data"></button>
-    </div>
+        </div>
+    </main>
 
     <script src="script.js"></script>
-    <script>lucide.createIcons();</script>
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Overwrite some script behaviors specifically for this enhanced dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            // Clock
+            function startClock() {
+                const el = document.getElementById('clock');
+                setInterval(() => {
+                    el.innerText = new Date().toLocaleTimeString();
+                }, 1000);
+            }
+            startClock();
+
+            // Chart
+            const ctx = document.getElementById('dashboardChart').getContext('2d');
+            const dashboardChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['-5m', '-4m', '-3m', '-2m', '-1m', 'Now'],
+                    datasets: [{
+                        data: [12, 18, 15, 22, 19, 21],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    }
+                }
+            });
+
+            // Dynamic Updates every 5s
+            setInterval(() => {
+                if (window.isDisasterMode) return;
+                
+                // Randomly nudge values
+                const alertEl = document.getElementById('alert-count');
+                if (Math.random() > 0.8) {
+                    alertEl.innerText = Math.max(0, parseInt(alertEl.innerText) + (Math.random() > 0.5 ? 1 : -1));
+                }
+                
+                const shelterEl = document.getElementById('shelter-count');
+                if (Math.random() > 0.9) {
+                    shelterEl.innerText = Math.max(10, Math.min(20, parseInt(shelterEl.innerText) + (Math.random() > 0.5 ? 1 : -1)));
+                }
+
+                // Random Log
+                const logs = ["Recalibrating buoy #4", "Cloud layer sync successful", "Sector 3 thermal audit complete", "Coastal tide level: 0.4m"];
+                if (Math.random() > 0.6) {
+                    updateLogsEnhanced(logs[Math.floor(Math.random() * logs.length)]);
+                }
+
+                // Update Chart
+                dashboardChart.data.datasets[0].data.shift();
+                dashboardChart.data.datasets[0].data.push(15 + Math.random() * 10);
+                dashboardChart.update();
+            }, 5000);
+        });
+
+        function updateLogsEnhanced(msg, isCritical = false) {
+            const list = document.getElementById('log-list');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${isCritical ? 'critical' : ''}`;
+            entry.innerHTML = `
+                <span class="log-time">${new Date().toLocaleTimeString()}</span>
+                <p>${msg}</p>
+            `;
+            list.insertBefore(entry, list.firstChild);
+            if (list.children.length > 15) list.removeChild(list.lastChild);
+        }
+
+        // DISASTER SIMULATION
+        function simulateDisaster() {
+            window.isDisasterMode = true;
+            
+            // UI Transformation
+            const statusTxt = document.getElementById('status-txt');
+            const dot = document.getElementById('dot');
+            const riskDisplay = document.getElementById('risk-display');
+            const banner = document.getElementById('map-banner');
+            const bannerText = document.getElementById('banner-text');
+            const timer = document.getElementById('timer-display');
+
+            statusTxt.innerText = "EMERGENCY MODE";
+            statusTxt.style.color = "var(--emergency-red)";
+            dot.style.background = "var(--emergency-red)";
+            dot.style.boxShadow = "var(--glow-red)";
+            
+            riskDisplay.innerText = "CRITICAL";
+            riskDisplay.style.color = "var(--emergency-red)";
+            
+            document.getElementById('alert-count').innerText = "24";
+            
+            banner.classList.add('blink-red');
+            bannerText.innerText = "TSUNAMI THREAT DETECTED";
+            
+            // Map Logic (if Leaflet is loaded)
+            if (window.map) {
+                L.circle([13.0827, 80.2707], {
+                    color: 'red', fillColor: '#f03', fillOpacity: 0.5, radius: 10000
+                }).addTo(window.map);
+                window.map.setView([13.0827, 80.2707], 10);
+            }
+
+            // Logs
+            updateLogsEnhanced("🚨 SEISMIC ANOMALY: Magnitude 8.2 detected!", true);
+            setTimeout(() => updateLogsEnhanced("⚠️ Tidal surge confirmed in Sector 7. Initiate Evacuation!", true), 1000);
+
+            // Start Countdown (20 minutes)
+            let timeLeft = 20 * 60;
+            const timerInt = setInterval(() => {
+                const m = Math.floor(timeLeft / 60);
+                const s = timeLeft % 60;
+                timer.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}:00`;
+                timer.style.color = "var(--emergency-red)";
+                if (timeLeft <= 0) clearInterval(timerInt);
+                timeLeft--;
+            }, 1000);
+
+            // Global simulation call
+            if (window.animateWave) window.animateWave();
+        }
+    </script>
 </body>
 </html>
