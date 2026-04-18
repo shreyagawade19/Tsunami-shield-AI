@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics | TsunamiShield AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dark-theme">
+
+    <aside class="sidebar">
+        <div class="logo-section">
+            <i data-lucide="waves" color="#3b82f6" size="32"></i>
+            <h1>Tsunami<span>Shield</span></h1>
+        </div>
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-item"><i data-lucide="layout-dashboard"></i> <span>Dashboard</span></a>
+            <a href="alerts.html" class="nav-item"><i data-lucide="bell"></i> <span>Alerts</span></a>
+            <a href="risk-map.html" class="nav-item"><i data-lucide="map"></i> <span>Risk Map</span></a>
+            <a href="evacuation.html" class="nav-item"><i data-lucide="move-up-right"></i> <span>Evacuation</span></a>
+            <a href="shelters.html" class="nav-item"><i data-lucide="home"></i> <span>Shelters</span></a>
+            <a href="analytics.html" class="nav-item active"><i data-lucide="bar-chart-big"></i> <span>Analytics</span></a>
+            <a href="community.html" class="nav-item"><i data-lucide="users"></i> <span>Community</span></a>
+            <a href="preparedness.html" class="nav-item"><i data-lucide="shield-check"></i> <span>Preparedness</span></a>
+            <a href="admin.html" class="nav-item"><i data-lucide="lock"></i> <span>Admin Panel</span></a>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="top-bar">
+            <button class="menu-toggle" id="mobile-menu-btn"><i data-lucide="menu"></i></button>
+            <div class="search-box">
+                <i data-lucide="search" size="18" color="#94a3b8"></i>
+                <input type="text" placeholder="Search analytics metrics...">
+            </div>
+            <div class="system-meta">
+                <div class="current-time" id="clock">00:00:00 AM</div>
+            </div>
+        </header>
+
+        <main class="dashboard-content">
+            <div class="hero-section">
+                <h2>Predictive Intelligence Center</h2>
+                <p>Advanced tidal harmonics and historical seismic correlation models.</p>
+            </div>
+
+            <div class="stats-grid" style="grid-template-columns: 1fr 1fr; gap:30px; margin-bottom:30px;">
+                <div class="feature-card">
+                    <h3>Historical Frequency</h3>
+                    <canvas id="historyChart"></canvas>
+                </div>
+                <div class="feature-card">
+                    <h3>Seasonal Risk (%)</h3>
+                    <canvas id="seasonalChart"></canvas>
+                </div>
+            </div>
+
+            <div class="feature-card" style="margin-bottom:30px;">
+                <h3>Coastal Tidal Harmonics (24h Trend)</h3>
+                <canvas id="tideAnalyticsChart" height="250"></canvas>
+            </div>
+
+            <div class="feature-card">
+                <h3>Historical Correlation: Tide vs. Run-up</h3>
+                <canvas id="correlationChart" height="250"></canvas>
+                <div id="next-tide-prediction" class="ai-insight card" style="margin-top:20px;">
+                    <h4><i data-lucide="waves"></i> Phase Prediction</h4>
+                    <p>Calculating tidal oscillations from sensor feedback...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+        window.onload = () => {
+            if(typeof initAnalytics === 'function') initAnalytics();
+            if(typeof calculateTidePredictions === 'function') calculateTidePredictions();
+        };
+    </script>
+</body>
+</html>

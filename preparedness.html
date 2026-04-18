@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preparedness | TsunamiShield AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="dark-theme">
+
+    <aside class="sidebar">
+        <div class="logo-section">
+            <i data-lucide="waves" color="#3b82f6" size="32"></i>
+            <h1>Tsunami<span>Shield</span></h1>
+        </div>
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-item"><i data-lucide="layout-dashboard"></i> <span>Dashboard</span></a>
+            <a href="alerts.html" class="nav-item"><i data-lucide="bell"></i> <span>Alerts</span></a>
+            <a href="risk-map.html" class="nav-item"><i data-lucide="map"></i> <span>Risk Map</span></a>
+            <a href="evacuation.html" class="nav-item"><i data-lucide="move-up-right"></i> <span>Evacuation</span></a>
+            <a href="shelters.html" class="nav-item"><i data-lucide="home"></i> <span>Shelters</span></a>
+            <a href="analytics.html" class="nav-item"><i data-lucide="bar-chart-big"></i> <span>Analytics</span></a>
+            <a href="community.html" class="nav-item"><i data-lucide="users"></i> <span>Community</span></a>
+            <a href="preparedness.html" class="nav-item active"><i data-lucide="shield-check"></i> <span>Preparedness</span></a>
+            <a href="admin.html" class="nav-item"><i data-lucide="lock"></i> <span>Admin Panel</span></a>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="top-bar">
+            <button class="menu-toggle" id="mobile-menu-btn"><i data-lucide="menu"></i></button>
+            <div class="current-time" id="clock">00:00:00 AM</div>
+        </header>
+
+        <main class="dashboard-content">
+            <div class="hero-section">
+                <h2>Citizen Preparedness Center</h2>
+                <p>Ensuring community resilience through survival kit verification and family emergency planning.</p>
+            </div>
+
+            <div class="grid-main" style="grid-template-columns: 1fr 1fr; gap:30px;">
+                <div class="feature-card">
+                    <h3><i data-lucide="clipboard-list"></i> Survival Kit Checklist</h3>
+                    <div id="prep-progress" style="height:6px; background:var(--accent-blue); width:0%; margin:15px 0; border-radius:3px; transition:0.4s;"></div>
+                    <p id="prep-status" style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:20px;">0/6 items verified</p>
+                    
+                    <div id="survival-kit" style="display:flex; flex-direction:column; gap:12px;">
+                        <label class="checkbox-container">
+                            <input type="checkbox" data-item="Water">
+                            <span>Fresh Water (3 Liters/person)</span>
+                        </label>
+                        <label class="checkbox-container">
+                            <input type="checkbox" data-item="FirstAid">
+                            <span>First Aid & Medical Supplies</span>
+                        </label>
+                        <label class="checkbox-container">
+                            <input type="checkbox" data-item="Flashlight">
+                            <span>Waterproof Flashlight & Batteries</span>
+                        </label>
+                        <label class="checkbox-container">
+                            <input type="checkbox" data-item="Food">
+                            <span>Non-perishable Emergency Rations</span>
+                        </label>
+                        <label class="checkbox-container">
+                            <input type="checkbox" data-item="Documents">
+                            <span>Legal Documents & Digital Backups</span>
+                        </label>
+                        <label class="checkbox-container">
+                            <input type="checkbox" data-item="Medication">
+                            <span>Prescription Medications</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <h3><i data-lucide="heart"></i> Family Emergency Plan</h3>
+                    <form id="family-form" style="margin-top:20px; display:flex; flex-direction:column; gap:15px;">
+                        <div class="control-group">
+                            <label>Add Family Member</label>
+                            <input type="text" id="family-name" class="input-pill" placeholder="First & Last Name..." style="background:#0a0a0a; border:1px solid var(--border-color);">
+                        </div>
+                        <button type="submit" class="btn btn-primary">SAVE PROTOCOL</button>
+                        <p id="family-status" style="font-size:0.8rem; margin-top:5px;"></p>
+                    </form>
+                    
+                    <div style="margin-top:25px; display:flex; flex-direction:column; gap:12px;">
+                        <button id="track-family" class="btn btn-outline full-width"><i data-lucide="map-pin"></i> LOCATE MEMBERS</button>
+                        <button id="alert-contacts" class="btn btn-primary full-width" style="background:var(--emergency-red);"><i data-lucide="alert-triangle"></i> EMERGENCY SOS</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+        window.onload = () => {
+            if(typeof loadPreparednessData === 'function') loadPreparednessData();
+        };
+    </script>
+</body>
+</html>

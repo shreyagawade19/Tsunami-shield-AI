@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shelters | TsunamiShield AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="dark-theme">
+
+    <aside class="sidebar">
+        <div class="logo-section">
+            <i data-lucide="waves" color="#3b82f6" size="32"></i>
+            <h1>Tsunami<span>Shield</span></h1>
+        </div>
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-item"><i data-lucide="layout-dashboard"></i> <span>Dashboard</span></a>
+            <a href="alerts.html" class="nav-item"><i data-lucide="bell"></i> <span>Alerts</span></a>
+            <a href="risk-map.html" class="nav-item"><i data-lucide="map"></i> <span>Risk Map</span></a>
+            <a href="evacuation.html" class="nav-item"><i data-lucide="move-up-right"></i> <span>Evacuation</span></a>
+            <a href="shelters.html" class="nav-item active"><i data-lucide="home"></i> <span>Shelters</span></a>
+            <a href="analytics.html" class="nav-item"><i data-lucide="bar-chart-big"></i> <span>Analytics</span></a>
+            <a href="community.html" class="nav-item"><i data-lucide="users"></i> <span>Community</span></a>
+            <a href="preparedness.html" class="nav-item"><i data-lucide="shield-check"></i> <span>Preparedness</span></a>
+            <a href="admin.html" class="nav-item"><i data-lucide="lock"></i> <span>Admin Panel</span></a>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="top-bar">
+            <button class="menu-toggle" id="mobile-menu-btn"><i data-lucide="menu"></i></button>
+            <div class="search-box">
+                <i data-lucide="search" size="18" color="#94a3b8"></i>
+                <input type="text" placeholder="Locate nearest shelter...">
+            </div>
+            <div class="system-meta">
+                <div class="current-time" id="clock">00:00:00 AM</div>
+                <button class="btn btn-primary"><i data-lucide="phone"></i> <span>SOS Hotline</span></button>
+            </div>
+        </header>
+
+        <main class="dashboard-content">
+            <div class="hero-section">
+                <h2>Shelter Intelligence Network</h2>
+                <p>Real-time occupancy metrics and resource auditing for high-ground evacuation centers.</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">Total Capacity</span>
+                    <span class="stat-value">4,500</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Current Occupancy</span>
+                    <span class="stat-value" style="color:var(--accent-blue);">1,240</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Available Units</span>
+                    <span class="stat-value" style="color:var(--safe-green);">3,260</span>
+                </div>
+            </div>
+
+            <div id="shelter-list-container" class="feature-grid" style="margin-top:40px;">
+                <!-- Existing dynamically loaded shelter cards will go here via script.js -->
+                <div class="feature-card shimmer" style="height:200px;"></div>
+                <div class="feature-card shimmer" style="height:200px;"></div>
+                <div class="feature-card shimmer" style="height:200px;"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+        window.onload = () => {
+            if(typeof loadShelters === 'function') loadShelters();
+        };
+    </script>
+</body>
+</html>

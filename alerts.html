@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alerts | TsunamiShield AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .alert-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .filter-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.05);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: var(--transition);
+        }
+        .filter-btn.active {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+        }
+        .notif-entry {
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .notif-entry:hover {
+            transform: scale(1.02);
+            background: rgba(255,255,255,0.08);
+        }
+        .notif-entry.critical { border-left: 4px solid var(--emergency-red); }
+        .notif-entry.warning { border-left: 4px solid #f59e0b; }
+        .notif-entry.info { border-left: 4px solid var(--accent-blue); }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .new-alert { animation: slideIn 0.4s ease-out; }
+    </style>
+</head>
+<body class="dark-theme">
+
+    <aside class="sidebar">
+        <div class="logo-section">
+            <i data-lucide="waves" color="#3b82f6" size="32"></i>
+            <h1>Tsunami<span>Shield</span></h1>
+        </div>
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-item"><i data-lucide="layout-dashboard"></i> <span>Dashboard</span></a>
+            <a href="alerts.html" class="nav-item active"><i data-lucide="bell"></i> <span>Alerts</span></a>
+            <a href="risk-map.html" class="nav-item"><i data-lucide="map"></i> <span>Risk Map</span></a>
+            <a href="evacuation.html" class="nav-item"><i data-lucide="move-up-right"></i> <span>Evacuation</span></a>
+            <a href="shelters.html" class="nav-item"><i data-lucide="home"></i> <span>Shelters</span></a>
+            <a href="analytics.html" class="nav-item"><i data-lucide="bar-chart-big"></i> <span>Analytics</span></a>
+            <a href="community.html" class="nav-item"><i data-lucide="users"></i> <span>Community</span></a>
+            <a href="preparedness.html" class="nav-item"><i data-lucide="shield-check"></i> <span>Preparedness</span></a>
+            <a href="admin.html" class="nav-item"><i data-lucide="lock"></i> <span>Admin Panel</span></a>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="top-bar">
+            <button class="menu-toggle" id="mobile-menu-btn"><i data-lucide="menu"></i></button>
+            <div class="search-box">
+                <i data-lucide="search" size="18" color="#94a3b8"></i>
+                <input type="text" placeholder="Search alerts...">
+            </div>
+            <div class="system-meta">
+                <div class="current-time" id="clock">00:00:00 AM</div>
+                <button class="btn btn-primary"><i data-lucide="phone"></i> <span>SOS Hotline</span></button>
+            </div>
+        </header>
+
+        <main class="dashboard-content">
+            <div class="hero-section">
+                <h2>Crisis Notifications</h2>
+                <p>Real-time emergency broadcasts and historical alert logs.</p>
+            </div>
+
+            <div class="alert-controls">
+                <button class="btn btn-primary" id="simulate-alert-btn">
+                    <i data-lucide="zap"></i> SIMULATE ALERT
+                </button>
+                <button class="btn btn-outline" id="clear-alerts-btn">
+                    <i data-lucide="trash-2"></i> CLEAR ALL
+                </button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">Active Alerts</span>
+                    <span class="stat-value" id="active-alert-val" style="color:var(--safe-green);">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Broadcast Reach</span>
+                    <span class="stat-value" id="broadcast-reach-val">98.2%</span>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="critical">Critical</button>
+                <button class="filter-btn" data-filter="warning">Warning</button>
+                <button class="filter-btn" data-filter="info">Info</button>
+            </div>
+
+            <div class="grid-main">
+                <div class="notification-panel" style="grid-column: span 2;">
+                    <div class="notif-header">
+                        <h3><i data-lucide="bell"></i> Global Alert Feed</h3>
+                        <span id="feed-status" style="font-size:0.7rem; color:var(--safe-green);">● LIVE MONITORING</span>
+                    </div>
+                    <div class="notif-list" id="alert-feed" style="max-height: 500px; overflow-y: auto;">
+                        <!-- Alerts dynamically added here -->
+                        <div class="notif-entry system info">
+                            <span class="time">SECURE</span>
+                            <p>Tsunami Monitoring Station 4 initialized. All sensors reporting nominal readings.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Alert Sound -->
+    <audio id="alert-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+
+        // Alert System Logic
+        const alertFeed = document.getElementById('alert-feed');
+        const alertVal = document.getElementById('active-alert-val');
+        const reachVal = document.getElementById('broadcast-reach-val');
+        const alertSound = document.getElementById('alert-sound');
+        
+        let activeAlertCount = 0;
+        const alertMessages = [
+            { type: 'info', msg: 'ℹ️ Sea level data synchronized with NOAA relay.', icon: 'info' },
+            { type: 'warning', msg: '⚠️ Minor seismic activity recorded in Sector 7.', icon: 'alert-triangle' },
+            { type: 'critical', msg: '🚨 URGENT: Seismic magnitude > 6.5 detected near coast!', icon: 'zap' },
+            { type: 'info', msg: 'ℹ️ Satellite uplink stabilized for eastern quadrant.', icon: 'satellite' },
+            { type: 'warning', msg: '⚠️ Coastal sensors reporting anomalous pressure waves.', icon: 'waves' },
+            { type: 'critical', msg: '🚨 EVACUATE: Tsunami trigger confirmed. Move to high ground!', icon: 'shield-alert' }
+        ];
+
+        function generateAlert(forcedType = null) {
+            const data = forcedType 
+                ? alertMessages.find(m => m.type === forcedType) 
+                : alertMessages[Math.floor(Math.random() * alertMessages.length)];
+            
+            addAlertToFeed(data.type, data.msg);
+        }
+
+        function addAlertToFeed(type, msg) {
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const entry = document.createElement('div');
+            entry.className = `notif-entry ${type} new-alert`;
+            entry.dataset.type = type;
+            
+            entry.innerHTML = `
+                <span class="time">${time} | ${type.toUpperCase()}</span>
+                <p>${msg}</p>
+            `;
+            
+            alertFeed.prepend(entry);
+            updateAlertCount(1);
+            
+            // Sound for critical/warning
+            if (type === 'critical' || type === 'warning') {
+                alertSound.play().catch(() => console.log("Sound interaction deferred."));
+            }
+
+            // Sync with Global Logs (if function exists in script.js)
+            if (typeof showToast === 'function') {
+                showToast(msg, type === 'critical' ? 'critical' : 'info');
+            }
+
+            // Animate Reach
+            animateReach();
+        }
+
+        function updateAlertCount(change) {
+            activeAlertCount += change;
+            if (activeAlertCount < 0) activeAlertCount = 0;
+            alertVal.innerText = activeAlertCount;
+            alertVal.style.color = activeAlertCount > 0 ? 'var(--emergency-red)' : 'var(--safe-green)';
+        }
+
+        function clearAlerts() {
+            alertFeed.innerHTML = '<div class="notif-entry system info"><span class="time">SYSTEM</span><p>Alert feed cleared by administrator.</p></div>';
+            activeAlertCount = 0;
+            updateAlertCount(0);
+        }
+
+        function filterAlerts(type) {
+            const entries = alertFeed.querySelectorAll('.notif-entry');
+            entries.forEach(entry => {
+                if (type === 'all' || entry.dataset.type === type || entry.classList.contains('system')) {
+                    entry.style.display = 'block';
+                } else {
+                    entry.style.display = 'none';
+                }
+            });
+        }
+
+        function animateReach() {
+            const current = parseFloat(reachVal.innerText);
+            const target = 95 + Math.random() * 4.9;
+            reachVal.innerText = target.toFixed(1) + "%";
+        }
+
+        // Listeners
+        document.getElementById('simulate-alert-btn').addEventListener('click', () => generateAlert());
+        document.getElementById('clear-alerts-btn').addEventListener('click', clearAlerts);
+        
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                filterAlerts(btn.dataset.filter);
+            });
+        });
+
+        // Auto Simulation
+        setInterval(() => {
+            if (Math.random() > 0.6) generateAlert();
+        }, 12000);
+
+    </script>
+</body>
+</html>

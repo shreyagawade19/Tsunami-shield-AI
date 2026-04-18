@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Map | TsunamiShield AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet Infrastructure -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+        .map-legend {
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            color: white;
+            line-height: 1.6;
+            font-size: 0.8rem;
+        }
+        .legend-title { font-weight: 700; margin-bottom: 8px; color: var(--accent-blue); }
+        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        .map-info-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            width: 260px;
+            pointer-events: auto;
+        }
+
+        .map-control-btn {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            width: 100%;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        .map-control-btn:hover { background: #2563eb; transform: translateY(-2px); }
+    </style>
+</head>
+<body class="dark-theme">
+
+    <aside class="sidebar">
+        <div class="logo-section">
+            <i data-lucide="waves" color="#3b82f6" size="32"></i>
+            <h1>Tsunami<span>Shield</span></h1>
+        </div>
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-item"><i data-lucide="layout-dashboard"></i> <span>Dashboard</span></a>
+            <a href="alerts.html" class="nav-item"><i data-lucide="bell"></i> <span>Alerts</span></a>
+            <a href="risk-map.html" class="nav-item active"><i data-lucide="map"></i> <span>Risk Map</span></a>
+            <a href="evacuation.html" class="nav-item"><i data-lucide="move-up-right"></i> <span>Evacuation</span></a>
+            <a href="shelters.html" class="nav-item"><i data-lucide="home"></i> <span>Shelters</span></a>
+            <a href="analytics.html" class="nav-item"><i data-lucide="bar-chart-big"></i> <span>Analytics</span></a>
+            <a href="community.html" class="nav-item"><i data-lucide="users"></i> <span>Community</span></a>
+            <a href="preparedness.html" class="nav-item"><i data-lucide="shield-check"></i> <span>Preparedness</span></a>
+            <a href="admin.html" class="nav-item"><i data-lucide="lock"></i> <span>Admin Panel</span></a>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="top-bar">
+            <button class="menu-toggle" id="mobile-menu-btn"><i data-lucide="menu"></i></button>
+            <div class="search-box">
+                <i data-lucide="search" size="18" color="#94a3b8"></i>
+                <input type="text" placeholder="Locate sector...">
+            </div>
+            <div class="system-meta">
+                <div class="current-time" id="clock">00:00:00 AM</div>
+                <button class="btn btn-primary"><i data-lucide="phone"></i> <span>SOS Hotline</span></button>
+            </div>
+        </header>
+
+        <main class="dashboard-content">
+            <div class="hero-section" style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:30px;">
+                <div>
+                    <h2>Live Risk Visualization</h2>
+                    <p>Dynamic geospatial modeling of coastal inundation and hazard zones.</p>
+                </div>
+                <button class="btn btn-primary" id="trigger-wave-sim">
+                    <i data-lucide="play"></i> SIMULATE TSUNAMI VECTOR
+                </button>
+            </div>
+
+            <div class="map-container" style="height: calc(100vh - 280px); position:relative;">
+                <div id="map"></div>
+                
+                <!-- Floating Info Panel -->
+                <div class="map-info-panel">
+                    <h4 style="margin-bottom:10px;"><i data-lucide="activity"></i> Sector Intelligence</h4>
+                    <div style="display:flex; flex-direction:column; gap:8px; font-size:0.8rem;">
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:var(--text-secondary);">Current Threat:</span>
+                            <span id="map-threat-level" style="color:var(--safe-green); font-weight:700;">STABLE</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:var(--text-secondary);">Active Red Zones:</span>
+                            <span id="active-red-zones">1</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:var(--text-secondary);">Safe-Haven Access:</span>
+                            <span style="color:var(--safe-green);">UNRESTRICTED</span>
+                        </div>
+                    </div>
+                    <button class="map-control-btn" id="toggle-zones-btn">HIDE RISK ZONES</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Map Script Infrastructure -->
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+
+        let map, userMarker, tsunamiWave;
+        const chennaiCenter = [13.0827, 80.2707];
+        
+        // Layer Groups
+        const riskLayer = L.layerGroup();
+        const sensorLayer = L.layerGroup();
+        const shelterLayer = L.layerGroup();
+
+        let showingZones = true;
+
+        function initMap() {
+            map = L.map('map', {
+                zoomControl: false,
+                attributionControl: false
+            }).setView(chennaiCenter, 11);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+            createRiskZones();
+            addMarkers();
+            addLegend();
+            
+            riskLayer.addTo(map);
+            sensorLayer.addTo(map);
+            shelterLayer.addTo(map);
+
+            // Layer Controls
+            L.control.layers(null, {
+                "Risk Zones": riskLayer,
+                "Sensors": sensorLayer,
+                "Shelters": shelterLayer
+            }, { position: 'topleft', collapsed: false }).addTo(map);
+        }
+
+        function createRiskZones() {
+            // RED ZONE (High)
+            L.circle([13.05, 80.28], {
+                color: '#ef4444',
+                fillColor: '#ef4444',
+                fillOpacity: 0.4,
+                radius: 4000
+            }).addTo(riskLayer).bindPopup("<b>CRITICAL RISK ZONE</b><br>Immediate Evacuation Mandatory.");
+
+            // YELLOW ZONE (Medium)
+            L.circle([13.08, 80.24], {
+                color: '#f59e0b',
+                fillColor: '#f59e0b',
+                fillOpacity: 0.3,
+                radius: 5000
+            }).addTo(riskLayer).bindPopup("<b>MEDIUM RISK ZONE</b><br>Standby for Evacuation Orders.");
+
+            // GREEN ZONE (Safe)
+            L.circle([13.12, 80.20], {
+                color: '#22c55e',
+                fillColor: '#22c55e',
+                fillOpacity: 0.2,
+                radius: 4500
+            }).addTo(riskLayer).bindPopup("<b>SAFE ZONE (HIGH GROUND)</b><br>Designated Assembly Point.");
+        }
+
+        function addMarkers() {
+            // User Location
+            const userPulse = L.divIcon({ className: 'user-marker-pulse', iconSize: [12, 12] });
+            userMarker = L.marker([13.045, 80.27], { icon: userPulse }).addTo(map)
+                .bindPopup("<b>Command Center (You)</b><br>Sector 4 Operations").openPopup();
+
+            // Sensors
+            const sensorIcon = L.divIcon({ html: '<i data-lucide="radio" color="#3b82f6" size="20"></i>', className: 'sensor-icon' });
+            [[13.15, 80.31], [13.01, 80.29], [13.10, 80.33]].forEach(coord => {
+                L.marker(coord, { icon: sensorIcon }).addTo(sensorLayer)
+                    .bindPopup("<b>SENSORY NODE ACTIVE</b><br>Real-time sea level monitoring.");
+            });
+
+            // Shelters
+            const shelterIcon = L.divIcon({ html: '<i data-lucide="home" color="#22c55e" size="20"></i>', className: 'shelter-icon' });
+            [[13.13, 80.22], [13.04, 80.19]].forEach(coord => {
+                L.marker(coord, { icon: shelterIcon }).addTo(shelterLayer)
+                    .bindPopup("<b>SHELTER ALPHA-4</b><br>Capacity: 500 | Occupancy: 120");
+            });
+            
+            lucide.createIcons();
+        }
+
+        function addLegend() {
+            const legend = L.control({ position: 'bottomright' });
+            legend.onAdd = function() {
+                const div = L.DomUtil.create('div', 'map-legend');
+                div.innerHTML = `
+                    <div class="legend-title">Risk Indices</div>
+                    <div class="legend-item"><span class="dot" style="background:#ef4444;"></span> High Alert (Inundation)</div>
+                    <div class="legend-item"><span class="dot" style="background:#f59e0b;"></span> Medium Risk (Surge)</div>
+                    <div class="legend-item"><span class="dot" style="background:#22c55e;"></span> Safe Zone (High Ground)</div>
+                    <div class="legend-item"><span class="dot" style="background:#3b82f6;"></span> Active Tsunami Sensor</div>
+                `;
+                return div;
+            };
+            legend.addTo(map);
+        }
+
+        function simulateTsunamiWave() {
+            if (tsunamiWave) map.removeLayer(tsunamiWave);
+            
+            tsunamiWave = L.circle([13.05, 80.35], {
+                color: '#3b82f6',
+                weight: 2,
+                fillColor: '#3b82f6',
+                fillOpacity: 0.1,
+                radius: 100
+            }).addTo(map);
+
+            let radius = 100;
+            const interval = setInterval(() => {
+                radius += 300;
+                tsunamiWave.setRadius(radius);
+                tsunamiWave.setStyle({ fillOpacity: 0.4 - (radius / 25000) });
+                
+                if (radius > 15000) {
+                    clearInterval(interval);
+                    map.removeLayer(tsunamiWave);
+                }
+            }, 50);
+
+            document.getElementById('map-threat-level').innerText = "CRITICAL";
+            document.getElementById('map-threat-level').style.color = "var(--emergency-red)";
+        }
+
+        function updateZones() {
+            // Randomly shift opacity or slightly move radius to simulate live sensor data
+            riskLayer.eachLayer(layer => {
+                const currentOpacity = layer.options.fillOpacity;
+                layer.setStyle({ fillOpacity: Math.min(0.5, Math.max(0.1, currentOpacity + (Math.random() * 0.1 - 0.05))) });
+            });
+        }
+
+        // Toggles
+        document.getElementById('toggle-zones-btn').addEventListener('click', (e) => {
+            if (showingZones) {
+                map.removeLayer(riskLayer);
+                e.target.innerText = "SHOW RISK ZONES";
+            } else {
+                map.addLayer(riskLayer);
+                e.target.innerText = "HIDE RISK ZONES";
+            }
+            showingZones = !showingZones;
+        });
+
+        document.getElementById('trigger-wave-sim').addEventListener('click', simulateTsunamiWave);
+
+        window.onload = () => {
+            initMap();
+            setInterval(updateZones, 10000);
+        };
+    </script>
+</body>
+</html>

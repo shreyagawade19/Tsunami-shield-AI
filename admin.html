@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control | TsunamiShield AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dark-theme">
+
+    <aside class="sidebar">
+        <div class="logo-section">
+            <i data-lucide="waves" color="#3b82f6" size="32"></i>
+            <h1>Tsunami<span>Shield</span></h1>
+        </div>
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-item"><i data-lucide="layout-dashboard"></i> <span>Dashboard</span></a>
+            <a href="alerts.html" class="nav-item"><i data-lucide="bell"></i> <span>Alerts</span></a>
+            <a href="risk-map.html" class="nav-item"><i data-lucide="map"></i> <span>Risk Map</span></a>
+            <a href="evacuation.html" class="nav-item"><i data-lucide="move-up-right"></i> <span>Evacuation</span></a>
+            <a href="shelters.html" class="nav-item"><i data-lucide="home"></i> <span>Shelters</span></a>
+            <a href="analytics.html" class="nav-item"><i data-lucide="bar-chart-big"></i> <span>Analytics</span></a>
+            <a href="community.html" class="nav-item"><i data-lucide="users"></i> <span>Community</span></a>
+            <a href="preparedness.html" class="nav-item"><i data-lucide="shield-check"></i> <span>Preparedness</span></a>
+            <a href="admin.html" class="nav-item active"><i data-lucide="lock"></i> <span>Admin Panel</span></a>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="top-bar">
+            <button class="menu-toggle" id="mobile-menu-btn"><i data-lucide="menu"></i></button>
+            <div class="current-time" id="clock">00:00:00 AM</div>
+        </header>
+
+        <main class="dashboard-content">
+            <div class="hero-section">
+                <h2>Admin Command Center</h2>
+                <p>Manual alert triggers, resource distribution, and satellite uplink management.</p>
+            </div>
+
+            <div class="grid-main" style="grid-template-columns: 1.5fr 1fr; gap:30px;">
+                <div class="feature-card">
+                    <h3>Manual Alert Override</h3>
+                    <div style="margin-top:20px; display:flex; flex-direction:column; gap:20px;">
+                        <div class="control-group">
+                            <label>Broadcast Level</label>
+                            <select id="manual-alert-level" class="input-pill" style="background:#0a0a0a; border: 1px solid var(--border-color);">
+                                <option value="GREEN">GREEN (Normal)</option>
+                                <option value="YELLOW">YELLOW (Watch)</option>
+                                <option value="RED">RED (Crisis Warning)</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>Simulated Wave Height (m)</label>
+                            <input type="number" id="manual-wave-height" class="input-pill" value="5" style="background:#0a0a0a; border:1px solid var(--border-color);">
+                        </div>
+                        <button id="btn-trigger-manual" class="btn btn-primary full-width" style="background:var(--emergency-red);">BROADCAST NATIONAL ALERT</button>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <h3>Logistics & Resources</h3>
+                    <canvas id="adminShelterChart"></canvas>
+                    <div id="admin-mini-logs" style="margin-top:15px; font-size:0.75rem; color:var(--text-secondary);"></div>
+                </div>
+            </div>
+
+            <div class="feature-card" style="margin-top:30px; padding:0; overflow:hidden;">
+                <div style="background:rgba(255,255,255,0.05); padding:15px; display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="margin:0;"><i data-lucide="satellite"></i> Live Satellite Feed (Operational)</h3>
+                    <span class="status-dot green"></span>
+                </div>
+                <img src="https://images.unsplash.com/photo-1516117172878-fd2c41f4a759?auto=format&fit=crop&q=80&w=1000" style="width:100%; height:300px; object-fit:cover; opacity:0.7;">
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+        window.onload = () => {
+            if(typeof renderAdminResources === 'function') renderAdminResources();
+            if(typeof updateAdminStats === 'function') updateAdminStats();
+        };
+    </script>
+</body>
+</html>

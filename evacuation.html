@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evacuation | TsunamiShield AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="dark-theme">
+
+    <aside class="sidebar">
+        <div class="logo-section">
+            <i data-lucide="waves" color="#3b82f6" size="32"></i>
+            <h1>Tsunami<span>Shield</span></h1>
+        </div>
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-item"><i data-lucide="layout-dashboard"></i> <span>Dashboard</span></a>
+            <a href="alerts.html" class="nav-item"><i data-lucide="bell"></i> <span>Alerts</span></a>
+            <a href="risk-map.html" class="nav-item"><i data-lucide="map"></i> <span>Risk Map</span></a>
+            <a href="evacuation.html" class="nav-item active"><i data-lucide="move-up-right"></i> <span>Evacuation</span></a>
+            <a href="shelters.html" class="nav-item"><i data-lucide="home"></i> <span>Shelters</span></a>
+            <a href="analytics.html" class="nav-item"><i data-lucide="bar-chart-big"></i> <span>Analytics</span></a>
+            <a href="community.html" class="nav-item"><i data-lucide="users"></i> <span>Community</span></a>
+            <a href="preparedness.html" class="nav-item"><i data-lucide="shield-check"></i> <span>Preparedness</span></a>
+            <a href="admin.html" class="nav-item"><i data-lucide="lock"></i> <span>Admin Panel</span></a>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="top-bar">
+            <button class="menu-toggle" id="mobile-menu-btn"><i data-lucide="menu"></i></button>
+            <div class="search-box">
+                <i data-lucide="search" size="18" color="#94a3b8"></i>
+                <input type="text" placeholder="Route to safe zone...">
+            </div>
+            <div class="system-meta">
+                <div class="current-time" id="clock">00:00:00 AM</div>
+                <button class="btn btn-primary"><i data-lucide="phone"></i> <span>SOS Hotline</span></button>
+            </div>
+        </header>
+
+        <main class="dashboard-content">
+            <div class="hero-section">
+                <h2>Autonomous Evacuation Routing</h2>
+                <p>Dynamic pathfinding for inland security during critical surge events.</p>
+            </div>
+
+            <div class="feature-card" style="margin-bottom:30px;">
+                <h3><i data-lucide="navigation"></i> Route Identification</h3>
+                <div style="margin-top:20px; display:flex; gap:15px;">
+                    <input type="text" class="input-pill" placeholder="Current Location (GPS Coordinates/Sector)..." style="background:#0a0a0a; border:1px solid var(--border-color); flex:1;">
+                    <button class="btn btn-primary">GENERATE VECTOR</button>
+                </div>
+            </div>
+
+            <div class="grid-main" style="grid-template-columns: 1fr; gap:30px;">
+                <div class="feature-card" id="route-info-display">
+                    <h3>Operational Vector Details</h3>
+                    <p style="color:var(--text-secondary); margin-top:10px;">Standby for autonomous path calculation. Identifying clearance for Sector 4 coastal escape...</p>
+                    <div class="notif-list" style="margin-top:20px;">
+                        <div class="notif-entry system"><span class="time">PATH 1</span><p>Expressway A: Open to high-clearance emergency traffic.</p></div>
+                        <div class="notif-entry system"><span class="time">PATH 2</span><p>Coastal Bridge: Monitoring structural integrity.</p></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

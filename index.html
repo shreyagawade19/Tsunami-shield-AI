@@ -3,187 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TsunamiShield AI – Coastal Disaster Alert & Evacuation System</title>
-    <meta name="description" content="Real-time tsunami disaster management system for coastal cities.">
+    <title>Dashboard | TsunamiShield AI</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Leaflet Mapping -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="manifest" href="manifest.json">
 </head>
 <body class="dark-theme">
-    <header class="navbar">
-        <div class="logo">
-            <i data-lucide="waves" class="logo-icon"></i>
-            <h1>Tsunami<span>Shield AI</span></h1>
-        </div>
-        <div class="alert-status" id="global-status">
-            <span class="status-dot green"></span>
-            <span class="status-text">Status: Normal</span>
-        </div>
-        <div class="nav-actions">
-            <div class="current-time" id="clock">12:00:00 PM</div>
-            <button class="btn btn-emergency">Emergency Hotline</button>
-        </div>
-    </header>
 
-    <main class="dashboard-grid">
-        <!-- Left Panel: Stats & Controls -->
-        <aside class="side-panel left">
-            <section class="card stats-grid">
-                <div class="stat-item">
-                    <span class="stat-label">Risk Level</span>
-                    <span class="stat-value text-green" id="risk-val">Low</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Pop. at Risk</span>
-                    <span class="stat-value" id="pop-risk">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Safe Zones</span>
-                    <span class="stat-value" id="safe-zones">12</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Evac. Time</span>
-                    <span class="stat-value" id="evac-time">--</span>
-                </div>
-            </section>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo-section">
+            <i data-lucide="waves" color="#3b82f6" size="32"></i>
+            <h1>Tsunami<span>Shield</span></h1>
+        </div>
 
-            <section class="card simulation-panel">
-                <div class="card-header">
-                    <i data-lucide="settings-2"></i>
-                    <h2>Simulation Controls</h2>
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-item active">
+                <i data-lucide="layout-dashboard"></i> <span>Dashboard</span>
+            </a>
+            <a href="alerts.html" class="nav-item">
+                <i data-lucide="bell"></i> <span>Alerts</span>
+            </a>
+            <a href="risk-map.html" class="nav-item">
+                <i data-lucide="map"></i> <span>Risk Map</span>
+            </a>
+            <a href="evacuation.html" class="nav-item">
+                <i data-lucide="move-up-right"></i> <span>Evacuation</span>
+            </a>
+            <a href="shelters.html" class="nav-item">
+                <i data-lucide="home"></i> <span>Shelters</span>
+            </a>
+            <a href="analytics.html" class="nav-item">
+                <i data-lucide="bar-chart-big"></i> <span>Analytics</span>
+            </a>
+            <a href="community.html" class="nav-item">
+                <i data-lucide="users"></i> <span>Community</span>
+            </a>
+            <a href="preparedness.html" class="nav-item">
+                <i data-lucide="shield-check"></i> <span>Preparedness</span>
+            </a>
+            <a href="admin.html" class="nav-item">
+                <i data-lucide="lock"></i> <span>Admin Panel</span>
+            </a>
+        </nav>
+
+        <div style="padding: 20px 25px;">
+            <div class="status-indicator">
+                <span class="status-dot green" id="status-dot"></span>
+                <span id="status-text">System Online</span>
+            </div>
+            <div id="connectivity-badge" class="hidden" style="margin-top:5px; color:var(--emergency-red); font-size:0.7rem;">OFFLINE MODE ACTIVE</div>
+        </div>
+    </aside>
+
+    <div class="main-wrapper">
+        <!-- Top Navigation Bar -->
+        <header class="top-bar">
+            <button class="menu-toggle" id="mobile-menu-btn">
+                <i data-lucide="menu"></i>
+            </button>
+            <div class="search-box">
+                <i data-lucide="search" size="18" color="#94a3b8"></i>
+                <input type="text" placeholder="Search coastal sectors...">
+            </div>
+            
+            <div class="system-meta">
+                <div id="offline-banner" class="offline-status-bar">
+                    <i data-lucide="wifi-off"></i> <span>LOCAL MODE</span>
                 </div>
-                <div class="control-group">
-                    <label>Wave Height (m)</label>
-                    <input type="range" id="wave-height" min="0" max="30" value="0">
-                    <span class="range-val" id="wave-val">0m</span>
-                </div>
-                <div class="control-group">
-                    <label>Affected Area</label>
-                    <select id="coastal-area">
-                        <option value="marina">Marina Beach</option>
-                        <option value="besant">Besant Nagar</option>
-                        <option value="foreshore">Foreshore Estate</option>
-                        <option value="all">Entire Coast</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label>Time to Impact</label>
-                    <div class="timer" id="impact-timer">00:00:00</div>
-                </div>
-                <button class="btn btn-primary full-width" id="start-sim">
-                    <i data-lucide="play"></i> Start Simulation
+                <div class="current-time" id="clock">00:00:00 AM</div>
+                <button class="btn btn-primary">
+                    <i data-lucide="phone"></i> <span>SOS Hotline</span>
                 </button>
-            </section>
+            </div>
+        </header>
 
-            <section class="card notification-panel">
-                <div class="card-header">
-                    <i data-lucide="bell"></i>
-                    <h2>Live Notifications</h2>
-                </div>
-                <div class="notification-list" id="notif-list">
-                    <div class="notif-item system">
-                        <span class="time">17:48</span>
-                        <p>System initialized. Monitoring coastal sensors.</p>
-                    </div>
-                </div>
-            </section>
-        </aside>
+        <!-- Main Dashboard Operations -->
+        <main class="dashboard-content">
+            <div class="hero-section">
+                <h2>Tsunami Intelligence Dashboard</h2>
+                <p>Advanced real-time monitoring and autonomous crisis coordination.</p>
+            </div>
 
-        <!-- Center Panel: Interactive Map -->
-        <section class="map-container">
-            <div id="map"></div>
-            <div class="map-overlay-top">
-                <div class="timeline-bar">
-                    <div class="timeline-progress" id="timeline-prog"></div>
-                    <div class="timeline-labels">
-                        <span>Detection</span>
-                        <span>Evaluation</span>
-                        <span>Warning</span>
-                        <span>Impact</span>
-                    </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">Critical Risk Level</span>
+                    <span class="stat-value risk-value" id="risk-val" style="color:var(--safe-green);">LOW</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Active Alerts</span>
+                    <span class="stat-value" id="active-alerts-count">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Safe Shelters</span>
+                    <span class="stat-value" id="safe-shelters-count">12</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Time to Impact</span>
+                    <span class="stat-value" id="impact-timer" style="color:var(--accent-blue);">00:00:00</span>
                 </div>
             </div>
-            <div class="map-overlay-bottom">
-                <div class="legend">
-                    <div class="legend-item"><span class="dot red"></span> High Risk</div>
-                    <div class="legend-item"><span class="dot yellow"></span> Moderate</div>
-                    <div class="legend-item"><span class="dot green"></span> Safe Zone</div>
-                    <div class="legend-item"><span class="line blue"></span> Evac Route</div>
-                </div>
-            </div>
-        </section>
 
-        <!-- Right Panel: Alerts & Routes -->
-        <aside class="side-panel right">
-            <section class="card alert-box" id="emergency-alert">
-                <div class="alert-header">
-                    <i data-lucide="alert-triangle"></i>
-                    <h3>No Active Alerts</h3>
+            <div class="grid-main">
+                <div class="map-container">
+                    <div id="map"></div>
+                    <div id="alert-banner" class="alert-banner safe" style="position:absolute; top:20px; left:20px; z-index:1000; padding:10px 20px; border-radius:10px; backdrop-filter:blur(10px);">SAFE</div>
                 </div>
-                <div class="alert-content">
-                    <p>Coastal monitoring stations report normal sea levels.</p>
-                </div>
-            </section>
 
-            <section class="card route-module">
-                <div class="card-header">
-                    <i data-lucide="map-pin"></i>
-                    <h2>Evacuation Routing</h2>
-                </div>
-                <div class="route-details" id="route-info">
-                    <p class="placeholder">Simulation inactive. No routes calculated.</p>
-                </div>
-                <div class="route-actions">
-                    <button class="btn btn-outline full-width">
-                        <i data-lucide="download"></i> Download Evac Map
-                    </button>
-                </div>
-            </section>
-
-            <section class="card phone-preview">
-                <div class="card-header">
-                    <i data-lucide="smartphone"></i>
-                    <h2>SMS Broadcast</h2>
-                </div>
-                <div class="phone-mockup">
-                    <div class="phone-screen">
-                        <div class="sms-bubble">
-                            <span class="sender">GOVT_MSG</span>
-                            <p id="sms-text">Standing by for alert transmission...</p>
+                <div class="notification-panel">
+                    <div class="notif-header">
+                        <h3><i data-lucide="activity"></i> System Logs</h3>
+                    </div>
+                    <div class="notif-list" id="notif-list">
+                        <div class="notif-entry system">
+                            <span class="time">SECURE</span>
+                            <p>Monitoring initialized. No seismic anomalies.</p>
                         </div>
                     </div>
                 </div>
-            </section>
-        </aside>
-    </main>
+            </div>
 
-    <!-- Overlay for Simulation Start -->
-    <div id="alarm-overlay" class="hidden">
-        <div class="alarm-content">
-            <i data-lucide="alert-octagon"></i>
-            <h1>TSUNAMI WARNING</h1>
-            <p>EVACUATE IMMEDIATELY TO HIGHER GROUND</p>
-        </div>
+            <div class="feature-grid" style="margin-top: 30px;">
+                <a href="analytics.html" class="feature-card" style="text-decoration:none;">
+                    <div class="feature-icon"><i data-lucide="zap"></i></div>
+                    <h3>AI Risk Multiplier</h3>
+                    <p>Correlate magnitude and tide for weighted threat scoring.</p>
+                </a>
+                <div class="feature-card">
+                    <div class="feature-icon"><i data-lucide="play-circle"></i></div>
+                    <h3>Manual Simulation</h3>
+                    <input type="range" id="waveSlider" min="1" max="10" value="3" style="width:100%; margin-top:10px;">
+                    <span style="font-size:0.7rem;">Height: <b id="wave-val">3m</b></span>
+                    <button class="btn btn-primary full-width" id="simulateBtn" style="font-size:0.7rem; margin-top:10px;">EXECUTE</button>
+                </div>
+            </div>
+        </main>
     </div>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <!-- Custom JS -->
+    <!-- Hidden legacy data bus -->
+    <div style="display:none;">
+        <span id="live-wave">--</span><button id="fetch-ocean-data"></button>
+    </div>
+
     <script src="script.js"></script>
-    <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
-    </script>
+    <script>lucide.createIcons();</script>
 </body>
 </html>
