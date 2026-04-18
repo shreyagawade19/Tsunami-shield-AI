@@ -3,12 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Preparedness | TsunamiShield AI</title>
+    <title>Citizen Preparedness | TsunamiShield AI</title>
+    
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        .preparedness-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .preparedness-grid {
+                grid-template-columns: 1fr;
+            }
+            .btn { width: 100%; justify-content: center; }
+            .input-pill { width: 100% !important; }
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .checkbox-item:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateX(5px);
+        }
+
+        .checkbox-item input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-blue);
+        }
+
+        .member-list {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .member-chip {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } }
+
+        .btn {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover { transform: scale(1.05); }
+        .btn:active { transform: scale(0.95); }
+
+        .sos-pulse {
+            animation: sosPulse 1.5s infinite;
+        }
+
+        @keyframes sosPulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .save-confirm {
+            color: var(--safe-green);
+            font-size: 0.8rem;
+            margin-top: 10px;
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        .save-confirm.visible { opacity: 1; }
+        
+        .feature-card:hover {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+        }
+    </style>
 </head>
 <body class="dark-theme">
 
@@ -33,75 +134,187 @@
     <div class="main-wrapper">
         <header class="top-bar">
             <button class="menu-toggle" id="mobile-menu-btn"><i data-lucide="menu"></i></button>
-            <div class="current-time" id="clock">00:00:00 AM</div>
+            <div class="system-meta" style="margin-left: auto;">
+                <div class="current-time" id="clock">00:00:00 AM</div>
+            </div>
         </header>
 
         <main class="dashboard-content">
             <div class="hero-section">
                 <h2>Citizen Preparedness Center</h2>
-                <p>Ensuring community resilience through survival kit verification and family emergency planning.</p>
+                <p>Manage your survival kit and family emergency protocols with real-time tracking.</p>
             </div>
 
-            <div class="grid-main" style="grid-template-columns: 1fr 1fr; gap:30px;">
+            <div class="preparedness-grid">
+                <!-- Checklist Section -->
                 <div class="feature-card">
                     <h3><i data-lucide="clipboard-list"></i> Survival Kit Checklist</h3>
-                    <div id="prep-progress" style="height:6px; background:var(--accent-blue); width:0%; margin:15px 0; border-radius:3px; transition:0.4s;"></div>
-                    <p id="prep-status" style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:20px;">0/6 items verified</p>
-                    
-                    <div id="survival-kit" style="display:flex; flex-direction:column; gap:12px;">
-                        <label class="checkbox-container">
-                            <input type="checkbox" data-item="Water">
-                            <span>Fresh Water (3 Liters/person)</span>
-                        </label>
-                        <label class="checkbox-container">
-                            <input type="checkbox" data-item="FirstAid">
-                            <span>First Aid & Medical Supplies</span>
-                        </label>
-                        <label class="checkbox-container">
-                            <input type="checkbox" data-item="Flashlight">
-                            <span>Waterproof Flashlight & Batteries</span>
-                        </label>
-                        <label class="checkbox-container">
-                            <input type="checkbox" data-item="Food">
-                            <span>Non-perishable Emergency Rations</span>
-                        </label>
-                        <label class="checkbox-container">
-                            <input type="checkbox" data-item="Documents">
-                            <span>Legal Documents & Digital Backups</span>
-                        </label>
-                        <label class="checkbox-container">
-                            <input type="checkbox" data-item="Medication">
-                            <span>Prescription Medications</span>
-                        </label>
+                    <div style="margin: 15px 0;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.85rem;">
+                            <span>Ready Status</span>
+                            <span id="checklist-progress-text">0/6 items verified</span>
+                        </div>
+                        <div style="height:8px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden;">
+                            <div id="checklist-progress-bar" style="height:100%; background:var(--accent-blue); width:0%; transition: 0.5s;"></div>
+                        </div>
+                    </div>
+
+                    <div id="checklist-items" style="display:flex; flex-direction:column; gap:10px;">
+                        <label class="checkbox-item"><input type="checkbox" data-item="1"> <span>Fresh Water (3L / person)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" data-item="2"> <span>First Aid Kit & Medications</span></label>
+                        <label class="checkbox-item"><input type="checkbox" data-item="3"> <span>Non-perishable Food (3 Days)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" data-item="4"> <span>Waterproof Flashlight</span></label>
+                        <label class="checkbox-item"><input type="checkbox" data-item="5"> <span>Battery Powered Radio</span></label>
+                        <label class="checkbox-item"><input type="checkbox" data-item="6"> <span>Sanitation & Hygiene Items</span></label>
                     </div>
                 </div>
 
+                <!-- Family Plan Section -->
                 <div class="feature-card">
-                    <h3><i data-lucide="heart"></i> Family Emergency Plan</h3>
-                    <form id="family-form" style="margin-top:20px; display:flex; flex-direction:column; gap:15px;">
-                        <div class="control-group">
-                            <label>Add Family Member</label>
-                            <input type="text" id="family-name" class="input-pill" placeholder="First & Last Name..." style="background:#0a0a0a; border:1px solid var(--border-color);">
-                        </div>
-                        <button type="submit" class="btn btn-primary">SAVE PROTOCOL</button>
-                        <p id="family-status" style="font-size:0.8rem; margin-top:5px;"></p>
-                    </form>
+                    <h3><i data-lucide="users"></i> Family Emergency Plan</h3>
                     
-                    <div style="margin-top:25px; display:flex; flex-direction:column; gap:12px;">
-                        <button id="track-family" class="btn btn-outline full-width"><i data-lucide="map-pin"></i> LOCATE MEMBERS</button>
-                        <button id="alert-contacts" class="btn btn-primary full-width" style="background:var(--emergency-red);"><i data-lucide="alert-triangle"></i> EMERGENCY SOS</button>
+                    <div style="margin-top: 20px;">
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                            <input type="text" id="member-input" class="input-pill" placeholder="Name of family member..." style="flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: white; padding: 10px 15px; border-radius: 10px;">
+                            <button class="btn btn-primary" onclick="addFamilyMember()"><i data-lucide="plus"></i> Add</button>
+                        </div>
+
+                        <div id="member-list" class="member-list">
+                            <!-- Members added here -->
+                        </div>
+
+                        <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 15px;">
+                            <button class="btn btn-primary" style="background:var(--accent-blue);" onclick="saveFamilyPlan()">
+                                <i data-lucide="save"></i> SAVE PROTOCOL
+                            </button>
+                            <span id="save-msg" class="save-confirm">Plan saved successfully!</span>
+                            
+                            <div style="display: flex; gap: 12px;">
+                                <button class="btn btn-outline" style="flex:1;" onclick="locateMembers()">
+                                    <i data-lucide="map-pin"></i> LOCATE
+                                </button>
+                                <button id="sos-btn" class="btn btn-primary" style="flex:1.5; background:var(--emergency-red);" onclick="triggerSOS()">
+                                    <i data-lucide="alert-triangle"></i> EMERGENCY SOS
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
+    <!-- Logic -->
     <script src="script.js"></script>
     <script>
-        lucide.createIcons();
-        window.onload = () => {
-            if(typeof loadPreparednessData === 'function') loadPreparednessData();
-        };
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            loadPreparednessData();
+            
+            // Checklist listener
+            document.querySelectorAll('#checklist-items input').forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    updateChecklistProgress();
+                    saveChecklist();
+                });
+            });
+
+            // Clock update
+            setInterval(() => {
+                document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+            }, 1000);
+        });
+
+        let familyMembers = [];
+
+        function updateChecklistProgress() {
+            const checkboxes = document.querySelectorAll('#checklist-items input');
+            const checked = Array.from(checkboxes).filter(c => c.checked).length;
+            const progress = (checked / checkboxes.length) * 100;
+            
+            document.getElementById('checklist-progress-text').innerText = `${checked}/${checkboxes.length} items verified`;
+            document.getElementById('checklist-progress-bar').style.width = `${progress}%`;
+        }
+
+        function saveChecklist() {
+            const states = Array.from(document.querySelectorAll('#checklist-items input')).map(c => c.checked);
+            localStorage.setItem('tsunami_checklist', JSON.stringify(states));
+        }
+
+        function addFamilyMember() {
+            const input = document.getElementById('member-input');
+            const name = input.value.trim();
+            if (!name) return;
+
+            familyMembers.push(name);
+            input.value = '';
+            renderMembers();
+        }
+
+        function removeMember(index) {
+            familyMembers.splice(index, 1);
+            renderMembers();
+        }
+
+        function renderMembers() {
+            const list = document.getElementById('member-list');
+            list.innerHTML = '';
+            familyMembers.forEach((name, index) => {
+                const chip = document.createElement('div');
+                chip.className = 'member-chip';
+                chip.innerHTML = `
+                    <span>${name}</span>
+                    <i data-lucide="x" size="14" style="cursor:pointer;" onclick="removeMember(${index})"></i>
+                `;
+                list.appendChild(chip);
+            });
+            lucide.createIcons();
+        }
+
+        function saveFamilyPlan() {
+            localStorage.setItem('tsunami_family', JSON.stringify(familyMembers));
+            const msg = document.getElementById('save-msg');
+            msg.classList.add('visible');
+            setTimeout(() => msg.classList.remove('visible'), 3000);
+        }
+
+        function loadPreparednessData() {
+            // Load checklist
+            const savedChecklist = JSON.parse(localStorage.getItem('tsunami_checklist'));
+            if (savedChecklist) {
+                const checkboxes = document.querySelectorAll('#checklist-items input');
+                savedChecklist.forEach((checked, i) => {
+                    if (checkboxes[i]) checkboxes[i].checked = checked;
+                });
+                updateChecklistProgress();
+            }
+
+            // Load family
+            const savedFamily = JSON.parse(localStorage.getItem('tsunami_family'));
+            if (savedFamily) {
+                familyMembers = savedFamily;
+                renderMembers();
+            }
+        }
+
+        function locateMembers() {
+            alert("📍 Tracking family members... \n1. Arjun (Safe Zone: 400m) \n2. Priya (Shelter A-1) \n📡 Signal quality: Strong");
+        }
+
+        function triggerSOS() {
+            const btn = document.getElementById('sos-btn');
+            btn.classList.add('sos-pulse');
+            
+            // Simulated Sound
+            const audio = new Audio('https://www.soundjay.com/button/beep-07.wav');
+            audio.play().catch(() => {});
+
+            alert("🚨 EMERGENCY ALERT SENT! \nBroadcasted to local authorities and saved family contacts.");
+            
+            setTimeout(() => {
+                btn.classList.remove('sos-pulse');
+            }, 5000);
+        }
     </script>
 </body>
 </html>
