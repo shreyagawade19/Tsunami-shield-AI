@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Map Initialization ---
     let map;
     function initMap() {
+        if (document.title.includes("Shelter")) return; // Skip global map on shelters page
         try {
             map = L.map('map', { zoomControl: false, attributionControl: false }).setView([13.0827, 80.2707], 11);
             window.map = map;
