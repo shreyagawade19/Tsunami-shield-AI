@@ -152,6 +152,14 @@
         .btn-outline { background: transparent; border: 1px solid var(--glass-border); color: var(--text-main); }
         .btn-outline:hover { background: rgba(255,255,255,0.05); }
 
+        #simulateBtn:active {
+            transform: scale(0.95);
+        }
+
+        #simulateBtn:hover {
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+        }
+
         /* Dashboard Content */
         .content-scroll {
             flex: 1;
@@ -343,10 +351,10 @@
         <header class="top-nav">
             <div class="clock-box" id="clock">09:44:33 AM</div>
             <div class="action-btns">
-                <button class="btn btn-outline">
-                    <i data-lucide="settings"></i> System Config
+                <button class="btn btn-outline" id="resetBtn">
+                    <i data-lucide="refresh-cw"></i> Reset System
                 </button>
-                <button class="btn btn-disaster" onclick="simulateDisaster()">
+                <button class="btn btn-disaster" id="simulateBtn">
                     <i data-lucide="zap"></i> Simulate Disaster
                 </button>
             </div>
@@ -362,12 +370,12 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <span class="label">Threat Level</span>
-                    <span class="value" id="risk-display" style="color: var(--safe-green);">LOW</span>
+                    <span class="value threat-level" id="risk-display" style="color: var(--safe-green);">LOW</span>
                     <div class="trend"><i data-lucide="trending-down" size="14"></i> -2.4% vs prev hr</div>
                 </div>
                 <div class="stat-card">
                     <span class="label">Active Alerts</span>
-                    <span class="value" id="alert-count">0</span>
+                    <span class="value active-alerts" id="alert-count">0</span>
                     <div class="trend" style="color: var(--text-dim);">Live Sensors Syncing</div>
                 </div>
                 <div class="stat-card">
@@ -377,7 +385,7 @@
                 </div>
                 <div class="stat-card">
                     <span class="label">Time to Impact</span>
-                    <span class="value" id="timer-display" style="color: var(--accent-blue);">00:00:00</span>
+                    <span class="value time-impact" id="timer-display" style="color: var(--accent-blue);">00:00:00</span>
                     <div class="trend" style="color: var(--text-dim);">No Anomaly Detected</div>
                 </div>
             </div>
@@ -400,7 +408,7 @@
                             <h3>Real-time Logs</h3>
                             <span style="font-size: 0.7rem; color: var(--accent-blue); font-weight: 800;">LIVE FEED</span>
                         </div>
-                        <div class="log-list" id="log-list">
+                        <div class="log-list logs-container" id="log-list">
                             <div class="log-entry">
                                 <span class="log-time">09:40:01 AM</span>
                                 <p>Satellite connection established.</p>
@@ -425,135 +433,6 @@
     <script>
         // Initialize Lucide Icons
         lucide.createIcons();
-
-        // Overwrite some script behaviors specifically for this enhanced dashboard
-        document.addEventListener('DOMContentLoaded', () => {
-            // Clock
-            function startClock() {
-                const el = document.getElementById('clock');
-                setInterval(() => {
-                    el.innerText = new Date().toLocaleTimeString();
-                }, 1000);
-            }
-            startClock();
-
-            // Chart
-            const ctx = document.getElementById('dashboardChart').getContext('2d');
-            const dashboardChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['-5m', '-4m', '-3m', '-2m', '-1m', 'Now'],
-                    datasets: [{
-                        data: [12, 18, 15, 22, 19, 21],
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { display: false },
-                        y: { display: false }
-                    }
-                }
-            });
-
-            // Dynamic Updates every 5s
-            setInterval(() => {
-                if (window.isDisasterMode) return;
-                
-                // Randomly nudge values
-                const alertEl = document.getElementById('alert-count');
-                if (Math.random() > 0.8) {
-                    alertEl.innerText = Math.max(0, parseInt(alertEl.innerText) + (Math.random() > 0.5 ? 1 : -1));
-                }
-                
-                const shelterEl = document.getElementById('shelter-count');
-                if (Math.random() > 0.9) {
-                    shelterEl.innerText = Math.max(10, Math.min(20, parseInt(shelterEl.innerText) + (Math.random() > 0.5 ? 1 : -1)));
-                }
-
-                // Random Log
-                const logs = ["Recalibrating buoy #4", "Cloud layer sync successful", "Sector 3 thermal audit complete", "Coastal tide level: 0.4m"];
-                if (Math.random() > 0.6) {
-                    updateLogsEnhanced(logs[Math.floor(Math.random() * logs.length)]);
-                }
-
-                // Update Chart
-                dashboardChart.data.datasets[0].data.shift();
-                dashboardChart.data.datasets[0].data.push(15 + Math.random() * 10);
-                dashboardChart.update();
-            }, 5000);
-        });
-
-        function updateLogsEnhanced(msg, isCritical = false) {
-            const list = document.getElementById('log-list');
-            const entry = document.createElement('div');
-            entry.className = `log-entry ${isCritical ? 'critical' : ''}`;
-            entry.innerHTML = `
-                <span class="log-time">${new Date().toLocaleTimeString()}</span>
-                <p>${msg}</p>
-            `;
-            list.insertBefore(entry, list.firstChild);
-            if (list.children.length > 15) list.removeChild(list.lastChild);
-        }
-
-        // DISASTER SIMULATION
-        function simulateDisaster() {
-            window.isDisasterMode = true;
-            
-            // UI Transformation
-            const statusTxt = document.getElementById('status-txt');
-            const dot = document.getElementById('dot');
-            const riskDisplay = document.getElementById('risk-display');
-            const banner = document.getElementById('map-banner');
-            const bannerText = document.getElementById('banner-text');
-            const timer = document.getElementById('timer-display');
-
-            statusTxt.innerText = "EMERGENCY MODE";
-            statusTxt.style.color = "var(--emergency-red)";
-            dot.style.background = "var(--emergency-red)";
-            dot.style.boxShadow = "var(--glow-red)";
-            
-            riskDisplay.innerText = "CRITICAL";
-            riskDisplay.style.color = "var(--emergency-red)";
-            
-            document.getElementById('alert-count').innerText = "24";
-            
-            banner.classList.add('blink-red');
-            bannerText.innerText = "TSUNAMI THREAT DETECTED";
-            
-            // Map Logic (if Leaflet is loaded)
-            if (window.map) {
-                L.circle([13.0827, 80.2707], {
-                    color: 'red', fillColor: '#f03', fillOpacity: 0.5, radius: 10000
-                }).addTo(window.map);
-                window.map.setView([13.0827, 80.2707], 10);
-            }
-
-            // Logs
-            updateLogsEnhanced("🚨 SEISMIC ANOMALY: Magnitude 8.2 detected!", true);
-            setTimeout(() => updateLogsEnhanced("⚠️ Tidal surge confirmed in Sector 7. Initiate Evacuation!", true), 1000);
-
-            // Start Countdown (20 minutes)
-            let timeLeft = 20 * 60;
-            const timerInt = setInterval(() => {
-                const m = Math.floor(timeLeft / 60);
-                const s = timeLeft % 60;
-                timer.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}:00`;
-                timer.style.color = "var(--emergency-red)";
-                if (timeLeft <= 0) clearInterval(timerInt);
-                timeLeft--;
-            }, 1000);
-
-            // Global simulation call
-            if (window.animateWave) window.animateWave();
-        }
     </script>
 </body>
 </html>
