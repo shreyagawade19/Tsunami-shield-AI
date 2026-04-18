@@ -3,13 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics | TsunamiShield AI</title>
+    <title>Predictive Analytics | TsunamiShield AI</title>
+    
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+
+        .chart-container:hover {
+            border-color: var(--accent-blue);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .prediction-panel {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .ai-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(6, 182, 212, 0.1));
+            border: 1px solid var(--accent-blue);
+            padding: 30px;
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-card::before {
+            content: 'AI';
+            position: absolute;
+            top: -20px;
+            right: -10px;
+            font-size: 8rem;
+            font-weight: 900;
+            color: rgba(255,255,255,0.03);
+            pointer-events: none;
+        }
+
+        .insight-box {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            border-radius: 20px;
+        }
+
+        .risk-gauge-container {
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--safe-green), var(--warning-amber), var(--emergency-red));
+            width: 45%;
+            transition: width 1s ease-in-out;
+        }
+
+        .insight-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1024px) {
+            .analytics-grid, .prediction-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body class="dark-theme">
 
@@ -36,53 +140,202 @@
             <button class="menu-toggle" id="mobile-menu-btn"><i data-lucide="menu"></i></button>
             <div class="search-box">
                 <i data-lucide="search" size="18" color="#94a3b8"></i>
-                <input type="text" placeholder="Search analytics metrics...">
+                <input type="text" placeholder="Analyze metrics...">
             </div>
-            <div class="system-meta">
+            <div class="system-meta" style="margin-left: auto;">
                 <div class="current-time" id="clock">00:00:00 AM</div>
             </div>
         </header>
 
         <main class="dashboard-content">
             <div class="hero-section">
-                <h2>Predictive Intelligence Center</h2>
-                <p>Advanced tidal harmonics and historical seismic correlation models.</p>
+                <h2>Predictive Intelligence Dashboard</h2>
+                <p>Decoding seismic patterns and tidal harmonics through neural networks.</p>
             </div>
 
-            <div class="stats-grid" style="grid-template-columns: 1fr 1fr; gap:30px; margin-bottom:30px;">
-                <div class="feature-card">
-                    <h3>Historical Frequency</h3>
-                    <canvas id="historyChart"></canvas>
+            <!-- Charts Section 1 -->
+            <div class="analytics-grid">
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 20px;"><i data-lucide="history"></i> Historical Frequency</h3>
+                    <canvas id="frequencyChart"></canvas>
                 </div>
-                <div class="feature-card">
-                    <h3>Seasonal Risk (%)</h3>
-                    <canvas id="seasonalChart"></canvas>
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 20px;"><i data-lucide="calendar"></i> Seasonal Risk (%)</h3>
+                    <canvas id="seasonChart"></canvas>
                 </div>
             </div>
 
-            <div class="feature-card" style="margin-bottom:30px;">
-                <h3>Coastal Tidal Harmonics (24h Trend)</h3>
-                <canvas id="tideAnalyticsChart" height="250"></canvas>
-            </div>
+            <!-- AI & Insights Section -->
+            <div class="prediction-panel">
+                <div class="ai-card">
+                    <h3 style="color: var(--accent-blue);"><i data-lucide="cpu"></i> AI Prediction</h3>
+                    <div style="margin-top: 20px;">
+                        <span style="font-size: 0.8rem; color: var(--text-secondary);">Tsunami Risk Probability</span>
+                        <h2 id="risk-prob" style="font-size: 3rem; font-weight: 800; color: var(--warning-amber);">35%</h2>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <span style="font-size: 0.8rem; color: var(--text-secondary);">Next Risk Window</span>
+                        <h4 id="risk-window" style="font-weight: 600;">2 Hours</h4>
+                    </div>
+                    
+                    <div class="risk-gauge-container">
+                        <span style="font-size: 0.75rem; font-weight: 700;">CURRENT RISK GAUGE</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="risk-fill"></div>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="feature-card">
-                <h3>Historical Correlation: Tide vs. Run-up</h3>
-                <canvas id="correlationChart" height="250"></canvas>
-                <div id="next-tide-prediction" class="ai-insight card" style="margin-top:20px;">
-                    <h4><i data-lucide="waves"></i> Phase Prediction</h4>
-                    <p>Calculating tidal oscillations from sensor feedback...</p>
+                <div class="insight-box">
+                    <h3 style="margin-bottom: 20px;"><i data-lucide="lightbulb"></i> Intelligence Insights</h3>
+                    <div class="insight-item">
+                        <i data-lucide="arrow-up-circle" color="var(--emergency-red)"></i>
+                        <span>High tide increases risk by 30% during seismic windows.</span>
+                    </div>
+                    <div class="insight-item">
+                        <i data-lucide="info" color="var(--accent-blue)"></i>
+                        <span>Most coastal events occur between June–September monsoon cycles.</span>
+                    </div>
+                    <div class="insight-item">
+                        <i data-lucide="check-circle" color="var(--safe-green)"></i>
+                        <span>Current ocean sensors reporting 99.8% data fidelity.</span>
+                    </div>
                 </div>
             </div>
+
+            <!-- Tidal Section -->
+            <div class="chart-container" style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 20px;"><i data-lucide="waves"></i> Tidal Harmonics (24h Real-time)</h3>
+                <canvas id="tideChart" height="100"></canvas>
+            </div>
+
         </main>
     </div>
 
+    <!-- Analytics Logic -->
     <script src="script.js"></script>
     <script>
-        lucide.createIcons();
-        window.onload = () => {
-            if(typeof initAnalytics === 'function') initAnalytics();
-            if(typeof calculateTidePredictions === 'function') calculateTidePredictions();
-        };
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initCharts();
+            startDataSimulation();
+            
+            // Sync clock
+            setInterval(() => {
+                document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+            }, 1000);
+        });
+
+        let freqChart, seasonalChart, tideAnalyticsChart;
+
+        function initCharts() {
+            // Frequency Chart
+            const freqCtx = document.getElementById('frequencyChart').getContext('2d');
+            freqChart = new Chart(freqCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+                    datasets: [{
+                        label: 'Historical Tsunami Events',
+                        data: [2, 5, 3, 8, 4, 6, 3, 1],
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                        borderColor: '#3b82f6',
+                        borderWidth: 1,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Seasonal Chart
+            const seasonCtx = document.getElementById('seasonChart').getContext('2d');
+            seasonalChart = new Chart(seasonCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Risk %',
+                        data: [15, 12, 18, 25, 45, 65, 85, 75, 60, 40, 30, 20],
+                        borderColor: '#06b6d4',
+                        backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+
+            // Tide Chart
+            const tideCtx = document.getElementById('tideChart').getContext('2d');
+            tideAnalyticsChart = new Chart(tideCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+                    datasets: [{
+                        label: 'Water Level (m)',
+                        data: Array.from({length: 24}, () => Math.random() * 2 + 0.5),
+                        borderColor: '#10b981',
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        fill: false,
+                        tension: 0.5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    animation: { duration: 2000 },
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function startDataSimulation() {
+            setInterval(() => {
+                // Update Tide Chart
+                const newData = Math.random() * 2 + 0.5;
+                tideAnalyticsChart.data.datasets[0].data.push(newData);
+                tideAnalyticsChart.data.datasets[0].data.shift();
+                tideAnalyticsChart.update('none');
+
+                // Update AI Prediction
+                generatePrediction();
+            }, 5000);
+        }
+
+        function generatePrediction() {
+            const riskValue = Math.floor(20 + Math.random() * 40);
+            const probEl = document.getElementById('risk-prob');
+            const fillEl = document.getElementById('risk-fill');
+            
+            probEl.innerText = `${riskValue}%`;
+            fillEl.style.width = `${riskValue}%`;
+
+            if (riskValue > 50) {
+                probEl.style.color = 'var(--emergency-red)';
+                document.getElementById('risk-window').innerText = "45 Minutes";
+            } else {
+                probEl.style.color = 'var(--warning-amber)';
+                document.getElementById('risk-window').innerText = "2 Hours";
+            }
+        }
     </script>
 </body>
 </html>
