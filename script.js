@@ -110,6 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast("System Secured", "info");
         setupNavigation();
         setupMobileMenu();
+        startDashboardSimulation();
+        initMiniChart();
     }
 
     function setupMobileMenu() {
@@ -185,6 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Chennai Center: 13.0827, 80.2707 | Zoom: 11
             map = L.map('map', { zoomControl: false, attributionControl: false }).setView([13.0827, 80.2707], 11);
+            window.map = map;
             
             // High-Contrast Dark Matter Tiles
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
@@ -211,6 +214,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 fillOpacity: 0.2,
                 radius: 4000
             }).addTo(map).bindPopup("<b>Moderate Risk Zone B</b><br>Secondary Inundation Risk");
+
+            // 4. Safe Zone (Inland)
+            L.circle([13.08, 80.20], {
+                color: '#22c55e',
+                fillColor: '#22c55e',
+                fillOpacity: 0.2,
+                radius: 3000
+            }).addTo(map).bindPopup("<b>Primary Safe Zone</b><br>Evacuation Hub Alpha");
 
             // Load Existing Assets
             createRiskZones();
@@ -755,7 +766,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Listeners ---
     document.getElementById('waveSlider')?.addEventListener('input', (e) => {
-        document.getElementById('wave-val').innerText = `${e.target.value}m`;
+        const val = document.getElementById('wave-val');
+        if (val) val.innerText = `${e.target.value}m`;
     });
 
     document.getElementById('simulateBtn')?.addEventListener('click', () => {
@@ -789,22 +801,156 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modalWave) modalWave.innerText = `${height}m`;
         if (modalImpact) modalImpact.innerText = `${impact} mins`;
 
-        alertBanner.className = "alert-banner critical blink";
-        alertBanner.innerText = "🚨 🔴 CRITICAL: TSUNAMI SIMULATION ACTIVE";
-        alertModal.classList.add('show');
+        if (alertBanner) {
+            alertBanner.className = "alert-banner critical blink";
+            alertBanner.innerText = "🚨 🔴 CRITICAL: TSUNAMI SIMULATION ACTIVE";
+        }
+        if (alertModal) alertModal.classList.add('show');
+        
         siren.play().catch(()=>{});
         animateWave();
         startCountdown(impact);
         
         saveLocalCrisisData('latest_alert', { active: true, text: "🚨 🔴 CRITICAL: TSUNAMI SIMULATION ACTIVE" });
-
-        speakAlert(`Initiating Tsunami Simulation. Warning: A ${height} meter wave has been detected. Evacuate to higher ground.`);
-        showToast("Simulation Engine Active", "critical");
     });
+
+    function updateDashboardData() {
+        const riskLevels = ["LOW", "MEDIUM", "HIGH"];
+        const riskVal = document.getElementById('risk-val');
+        const alertCount = document.getElementById('active-alerts-count');
+        const shelterCount = document.getElementById('safe-shelters-count');
+        
+        // Randomly nudge data unless in disaster mode
+        if (!window.isDisasterMode) {
+            // Update Risk Level (Occasionally change)
+            if (Math.random() > 0.8) {
+                const newRisk = riskLevels[Math.floor(Math.random() * 2)]; // Keep it LOW/MEDIUM
+                if (riskVal) {
+                    riskVal.innerText = newRisk;
+                    riskVal.style.color = newRisk === "MEDIUM" ? "#f59e0b" : "var(--safe-green)";
+                }
+            }
+
+            // Update Alerts
+            if (alertCount) {
+                const current = parseInt(alertCount.innerText);
+                const next = Math.max(0, current + (Math.random() > 0.7 ? 1 : (Math.random() > 0.8 ? -1 : 0)));
+                alertCount.innerText = next;
+            }
+
+            // Update Shelters
+            if (shelterCount) {
+                const current = parseInt(shelterCount.innerText);
+                const next = Math.max(10, Math.min(15, current + (Math.random() > 0.9 ? 1 : (Math.random() > 0.9 ? -1 : 0))));
+                shelterCount.innerText = next;
+            }
+            
+            // Random Logs
+            const logs = [
+                "Scanning coastal sector 4...",
+                "Sea level telemetry synced.",
+                "Buoy #12 heartbeat received.",
+                "Sensor recalibration complete.",
+                "Atmospheric pressure stable."
+            ];
+            if (Math.random() > 0.6) {
+                updateLogs(logs[Math.floor(Math.random() * logs.length)], "system");
+            }
+        }
+
+        // Update Chart
+        if (miniChart) {
+            const newVal = Math.floor(Math.random() * 30) + (window.isDisasterMode ? 60 : 10);
+            miniChart.data.datasets[0].data.shift();
+            miniChart.data.datasets[0].data.push(newVal);
+            miniChart.update();
+        }
+    }
+
+    window.updateLogs = function(message, type = "system") {
+        const list = document.getElementById('notif-list');
+        if (!list) return;
+
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const entry = document.createElement('div');
+        entry.className = `notif-entry ${type}`;
+        entry.innerHTML = `
+            <span class="time">${time}</span>
+            <p>${message}</p>
+        `;
+        
+        list.insertBefore(entry, list.firstChild);
+        
+        // Keep logs manageable
+        if (list.children.length > 20) {
+            list.removeChild(list.lastChild);
+        }
+    };
+
+    window.simulateDisaster = function() {
+        window.isDisasterMode = true;
+        
+        // 1. Change Risk to HIGH
+        const riskVal = document.getElementById('risk-val');
+        if (riskVal) {
+            riskVal.innerText = "HIGH";
+            riskVal.style.color = "var(--emergency-red)";
+        }
+
+        // 2. Increase Alerts
+        const alertCount = document.getElementById('active-alerts-count');
+        if (alertCount) alertCount.innerText = "14";
+
+        // 3. Update Logs
+        updateLogs("⚠️ CRITICAL: SEISMIC ANOMALY DETECTED!", "critical");
+        updateLogs("⚠️ Tidal surge confirmed in Sector 7.", "critical");
+        updateLogs("🚨 Evacuation recommended for coastal zones.", "critical");
+
+        // 4. Update Map Zones
+        updateMapDisaster();
+
+        // 5. Banner Update
+        const banner = document.getElementById('alert-banner');
+        if (banner) {
+            banner.className = "alert-banner critical blink alert-pulse";
+            banner.innerText = "🚨 EMERGENCY";
+        }
+
+        // 6. Impact Timer
+        startCountdown(25);
+        
+        // 7. Status Indicator
+        const statusText = document.getElementById('status-text');
+        const statusDot = document.getElementById('status-dot');
+        if (statusText) statusText.innerText = "EMERGENCY MODE";
+        if (statusDot) statusDot.className = "status-dot red";
+
+        showToast("DISASTER MODE ACTIVATED", "critical");
+        siren.play().catch(()=>{});
+        speakAlert("Emergency Warning. A critical tsunami threat has been detected. Please activate evacuation protocols.");
+    };
+
+    function updateMapDisaster() {
+        if (!map) return;
+        
+        // Highlight zones in red
+        L.circle([13.0827, 80.2707], {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.6,
+            radius: 8000
+        }).addTo(map).bindPopup("<b>IMPACT ZONE</b>").openPopup();
+        
+        // Add more markers
+        L.marker([13.045, 80.32], { 
+            icon: L.divIcon({ className: 'emergency-marker', html: '<i data-lucide="alert-triangle" color="#ef4444"></i>' }) 
+        }).addTo(map).bindPopup("<b>Sea level rising fast!</b>");
+        
+        lucide.createIcons();
+    }
+
     toggleAnalyticsBtn.addEventListener('click', () => { analyticsOverlay.classList.add('show'); setTimeout(initAnalytics, 100); });
     closeAnalyticsBtn.addEventListener('click', () => analyticsOverlay.classList.remove('show'));
-    togglePrepBtn.addEventListener('click', () => prepOverlay.classList.add('show'));
-    closePrepBtn.addEventListener('click', () => prepOverlay.classList.remove('show'));
     checklistItems.forEach(i => i.addEventListener('change', updateChecklistProgress));
     familyForm.addEventListener('submit', saveFamilyPlan);
     trackFamilyBtn.addEventListener('click', locateFamilyMember);

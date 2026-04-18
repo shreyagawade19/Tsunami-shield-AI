@@ -269,6 +269,32 @@ body {
     box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15), 0 0 20px rgba(59, 130, 246, 0.1);
 }
 
+.hover-glow:hover {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+    border-color: var(--accent-blue);
+    transform: translateY(-5px);
+}
+
+.alert-pulse {
+    animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+    0% { border-color: rgba(255, 255, 255, 0.1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); }
+    50% { border-color: rgba(255, 255, 255, 0.4); box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.1); }
+    100% { border-color: rgba(255, 255, 255, 0.1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); }
+}
+
+.alert-pulse.critical {
+    animation: pulse-red 1.5s infinite;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
 .stat-card::after {
     content: '';
     position: absolute;
@@ -283,7 +309,7 @@ body {
 /* Map & Cards Container */
 .grid-main {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 2.5fr 1fr;
     gap: 20px;
 }
 
@@ -361,6 +387,12 @@ body {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    max-height: 400px;
+}
+
+.scroll-logs {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-blue) transparent;
 }
 
 .notif-entry {
