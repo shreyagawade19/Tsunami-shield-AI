@@ -36,6 +36,25 @@
             --glow-red: 0 0 30px rgba(239, 68, 68, 0.5);
             --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        
+        :root.light-theme {
+            --bg-deep: #e2e8f0;
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --accent-blue: #2563eb;
+            --text-main: #0f172a;
+            --text-dim: #475569;
+            --glass-border: rgba(0, 0, 0, 0.1);
+        }
+        
+        .light-theme .sidebar {
+            background: rgba(255, 255, 255, 0.6);
+            border-right: 1px solid var(--glass-border);
+        }
+        .light-theme .top-nav {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        .light-theme .map-box { background: #cbd5e1; }
+        .light-theme .map-overlay-banner { background: rgba(255,255,255,0.9); border: 1px solid var(--glass-border); color: #0f172a; }
 
         * {
             margin: 0;
@@ -351,6 +370,9 @@
         <header class="top-nav">
             <div class="clock-box" id="clock">09:44:33 AM</div>
             <div class="action-btns">
+                <button class="btn btn-outline" id="themeToggleBtn">
+                    <i data-lucide="sun"></i> Theme
+                </button>
                 <button class="btn btn-outline" id="resetBtn">
                     <i data-lucide="refresh-cw"></i> Reset System
                 </button>

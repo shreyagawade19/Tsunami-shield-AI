@@ -8,20 +8,92 @@ document.addEventListener('DOMContentLoaded', () => {
     const simulateBtn = document.getElementById('simulateBtn');
     const resetBtn = document.getElementById('resetBtn');
     const clockDisplay = document.getElementById('clock');
+    
+    // --- Theme Toggling ---
+    const themeBtn = document.getElementById('themeToggleBtn');
+    if (localStorage.getItem('theme') === 'light') {
+        document.documentElement.classList.add('light-theme');
+    }
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('light-theme');
+            if (document.documentElement.classList.contains('light-theme')) {
+                localStorage.setItem('theme', 'light');
+                themeBtn.innerHTML = '<i data-lucide="moon"></i> Theme';
+            } else {
+                localStorage.setItem('theme', 'dark');
+                themeBtn.innerHTML = '<i data-lucide="sun"></i> Theme';
+            }
+            if (window.lucide) lucide.createIcons();
+        });
+    }
+
+    // --- Global Button Interactivity (Prototype Wiring) ---
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', () => {
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) sidebar.classList.toggle('active');
+        });
+    }
+
+    document.querySelectorAll('button:not(#simulateBtn):not(#resetBtn):not(#themeToggleBtn):not(#trigger-wave-sim)').forEach(btn => {
+        // Skip map controls, existing scripts, or inline onclick handlers
+        if (btn.hasAttribute('onclick') || btn.classList.contains('menu-toggle') || btn.classList.contains('map-control-btn') || btn.classList.contains('filter-btn')) return;
+
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const text = this.innerText.trim();
+            
+            if (text.includes('SOS')) {
+                alert("🚨 EMERGENCY SOS BROADCAST DEPLOYED.\nLocal emergency services have been pinged with your exact coordinates.");
+                return;
+            }
+
+            const originalHTML = this.innerHTML;
+            this.innerHTML = `<i data-lucide="loader-2"></i> Wait...`;
+            this.style.opacity = '0.7';
+            if (window.lucide) lucide.createIcons();
+
+            setTimeout(() => {
+                this.innerHTML = originalHTML;
+                this.style.opacity = '1';
+                alert(`System Action: [ ${text || 'Command'} ] executed successfully in the simulated environment.`);
+                if (window.lucide) lucide.createIcons();
+            }, 600);
+        });
+    });
 
     // --- Map Initialization ---
     let map;
     function initMap() {
         if (document.title.includes("Shelter")) return; // Skip global map on shelters page
         try {
-            map = L.map('map', { zoomControl: false, attributionControl: false }).setView([13.0827, 80.2707], 11);
+            map = L.map('map', { zoomControl: false, attributionControl: false }).setView([20.5937, 78.9629], 4.8);
             window.map = map;
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+            
+            // Load Google Maps Tile Layer
+            L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                maxZoom: 20
+            }).addTo(map);
 
             // Coastal markers and risk zones
-            L.circle([13.05, 80.28], { color: '#ef4444', fillOpacity: 0.35, radius: 3500 }).addTo(map);
-            L.circle([13.12, 80.20], { color: '#22c55e', fillOpacity: 0.2, radius: 3000 }).addTo(map);
-
+            L.circle([13.05, 80.28], { 
+                color: '#991b1b', // Dark Red outline
+                fillColor: '#ef4444', // Bright Red fill
+                fillOpacity: 0.6, 
+                weight: 3,
+                radius: 12000 
+            }).addTo(map).bindPopup("<b style='color:red;'>⚠️ DANGER ZONE</b><br>High Tsunami Inundation Risk");
+            
+            L.circle([13.12, 80.12], { 
+                color: '#166534', // Dark Green outline
+                fillColor: '#22c55e', // Bright Green fill
+                fillOpacity: 0.6, 
+                weight: 3,
+                radius: 12000 
+            }).addTo(map).bindPopup("<b style='color:green;'>✅ SAFE ZONE</b><br>High Ground Area");
+            
             // System Monitoring Active Popup
             L.popup().setLatLng([13.0827, 80.2707]).setContent("System Monitoring Active").openOn(map);
         } catch (e) {
@@ -132,8 +204,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 6. Map Visuals (Enhanced)
         if (map) {
-            L.circle([13.0827, 80.2707], { color: 'red', fillColor: '#f03', fillOpacity: 0.5, radius: 10000 }).addTo(map);
-            map.setView([13.0827, 80.2707], 10);
+            L.circle([13.0827, 80.2707], { color: 'red', fillColor: '#f03', fillOpacity: 0.5, radius: 50000 }).addTo(map);
+            map.setView([20.5937, 78.9629], 5);
         }
 
         // UI Transformation (Enhanced)

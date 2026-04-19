@@ -12,6 +12,17 @@
     --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+:root.light-theme {
+    --bg-primary: #e2e8f0;
+    --bg-secondary: #f8fafc;
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --accent-blue: #2563eb;
+    --accent-glow: rgba(37, 99, 235, 0.3);
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --border-color: rgba(0, 0, 0, 0.1);
+}
+
 * {
     margin: 0;
     padding: 0;

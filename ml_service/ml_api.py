@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import requests
 import os
+import ai_agent
 
 app = Flask(__name__)
 CORS(app) # Allow Express server to communicate with this
@@ -16,9 +17,9 @@ MODEL_PATH = os.path.join(os.path.dirname(__file__), 'models', 'tsunami_anomaly_
 try:
     with open(MODEL_PATH, 'rb') as f:
         model = pickle.load(f)
-    print("✅ Model loaded successfully!")
+    print("SUCCESS: Model loaded successfully!")
 except Exception as e:
-    print(f"⚠️ Failed to load model: {e}")
+    print(f"FAILED: Failed to load model: {e}")
     model = None
 
 @app.route('/', methods=['GET'])
@@ -48,11 +49,17 @@ def analyze_sea_level():
         variance = np.var(water_levels[-5:]) if len(water_levels) >= 5 else 0
         threat_score = min(0.99, (variance / 5.0)) if is_anomaly else random.uniform(0.1, 0.3)
         
+        dispatch_report = None
+        if is_anomaly:
+            # AUTONOMOUS AGENT ACTIVATION: Draft and send Twilio SMS
+            dispatch_report = ai_agent.dispatch_emergency(water_levels)
+        
         return jsonify({
             "status": "success",
             "threat_score": threat_score,
             "is_anomaly": is_anomaly,
-            "message": "AI Detected Sea Level Anomaly!" if is_anomaly else "Normal levels"
+            "message": "AI Detected Sea Level Anomaly!" if is_anomaly else "Normal levels",
+            "dispatch_info": dispatch_report
         }), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e), "is_anomaly": False}), 500

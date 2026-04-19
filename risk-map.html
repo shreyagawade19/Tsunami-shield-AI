@@ -140,7 +140,7 @@
         lucide.createIcons();
 
         let map, userMarker, tsunamiWave;
-        const chennaiCenter = [13.0827, 80.2707];
+        const indiaCenter = [20.5937, 78.9629];
         
         // Layer Groups
         const riskLayer = L.layerGroup();
@@ -153,9 +153,9 @@
             map = L.map('map', {
                 zoomControl: false,
                 attributionControl: false
-            }).setView(chennaiCenter, 11);
+            }).setView(indiaCenter, 4.8);
 
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+            L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}').addTo(map);
 
             createRiskZones();
             addMarkers();

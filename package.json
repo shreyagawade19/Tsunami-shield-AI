@@ -4,6 +4,7 @@
   "description": "A modern, real-time tsunami disaster management simulation for Chennai, India.",
   "main": "script.js",
   "scripts": {
+    "start": "concurrently \"node server.js\" \"cd ml_service && python ml_api.py\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -23,5 +24,8 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }
