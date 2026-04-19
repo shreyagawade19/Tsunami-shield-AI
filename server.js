@@ -34,7 +34,20 @@ app.get('/api/sea-level', async (req, res) => {
             v: parseFloat(d.v) + (Math.random() > 0.95 ? 2.5 : 0) // Simulating random anomalies
         }));
 
-        res.json({ station, data });
+        // Send data to the Python ML Service for Anomaly Detection
+        let ml_analysis = { threat_score: 0, is_anomaly: false, message: "ML Service Unavailable" };
+        try {
+            const mlResponse = await axios.post('http://127.0.0.1:5001/api/analyze-sea-level', {
+                station: station,
+                data: data.slice(-10) // Send the latest 10 points for ML evaluation
+            });
+            ml_analysis = mlResponse.data;
+        } catch (mlError) {
+            console.error("Warning: ML Service not reachable:", mlError.message);
+        }
+
+        // Return combined data (NOAA Sea Level + ML Threat Assessment)
+        res.json({ station, data, ml_analysis });
     } catch (error) {
         console.error("Error fetching NOAA data:", error.message);
         res.status(500).json({ error: "Failed to fetch sea level data" });
