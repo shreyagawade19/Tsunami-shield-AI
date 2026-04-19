@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Removed map scripts as requested -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="dark-theme">
@@ -45,25 +47,29 @@
 
         <main class="dashboard-content">
             <div class="hero-section">
-                <h2>Autonomous Evacuation Routing</h2>
-                <p>Dynamic pathfinding for inland security during critical surge events.</p>
+                <h2>Autonomous Evacuation Hub</h2>
+                <p>Instantly locate high-ground schools, hospitals, and open spaces near your GPS coordinates.</p>
             </div>
 
             <div class="feature-card" style="margin-bottom:30px;">
-                <h3><i data-lucide="navigation"></i> Route Identification</h3>
-                <div style="margin-top:20px; display:flex; gap:15px;">
-                    <input type="text" class="input-pill" placeholder="Current Location (GPS Coordinates/Sector)..." style="background:#0a0a0a; border:1px solid var(--border-color); flex:1;">
-                    <button class="btn btn-primary">GENERATE VECTOR</button>
+                <h3><i data-lucide="navigation"></i> Broadcast Location</h3>
+                <div style="margin-top:20px; display:flex; gap:15px; align-items: center;">
+                    <div style="position: relative; flex: 1;">
+                        <input type="text" id="route-location-input" class="input-pill" placeholder="Current Location (GPS Coordinates/Sector)..." style="background:transparent; border:1px solid var(--border-color); width: 100%; padding-right: 50px;">
+                        <button id="gps-locate-btn" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--accent-blue); cursor: pointer;" title="Acquire GPS Lock">
+                            <i data-lucide="crosshair" size="20"></i>
+                        </button>
+                    </div>
+                    <button class="btn btn-primary" onclick="generatePlacesList()">FIND NEAREST SAFETY</button>
                 </div>
             </div>
 
             <div class="grid-main" style="grid-template-columns: 1fr; gap:30px;">
                 <div class="feature-card" id="route-info-display">
-                    <h3>Operational Vector Details</h3>
-                    <p style="color:var(--text-secondary); margin-top:10px;">Standby for autonomous path calculation. Identifying clearance for Sector 4 coastal escape...</p>
-                    <div class="notif-list" style="margin-top:20px;">
-                        <div class="notif-entry system"><span class="time">PATH 1</span><p>Expressway A: Open to high-clearance emergency traffic.</p></div>
-                        <div class="notif-entry system"><span class="time">PATH 2</span><p>Coastal Bridge: Monitoring structural integrity.</p></div>
+                    <h3>Nearest Identified Safe Havens</h3>
+                    <p style="color:var(--text-secondary); margin-top:10px;">Acquire GPS lock and generate query to populate safe zones.</p>
+                    <div class="notif-list" id="route-steps" style="margin-top:20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; max-height: max-content;">
+                        <!-- Safe Places Injected Here -->
                     </div>
                 </div>
             </div>
@@ -71,6 +77,119 @@
     </div>
 
     <script src="script.js"></script>
-    <script>lucide.createIcons();</script>
+    <script>
+        lucide.createIcons();
+
+        // Autonomous GPS Locator Logic
+        document.getElementById('gps-locate-btn').addEventListener('click', () => {
+            const inputField = document.getElementById('route-location-input');
+            const btn = document.getElementById('gps-locate-btn');
+            
+            const originalIcon = '<i data-lucide="crosshair" size="20"></i>';
+            btn.innerHTML = '<i data-lucide="loader-2" size="20"></i>';
+            lucide.createIcons();
+
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude.toFixed(6);
+                        const lng = position.coords.longitude.toFixed(6);
+                        
+                        inputField.value = `${lat}, ${lng}`;
+                        
+                        btn.innerHTML = '<i data-lucide="check-circle" size="20" style="color:var(--safe-green)"></i>';
+                        lucide.createIcons();
+
+                        setTimeout(() => {
+                            btn.innerHTML = originalIcon;
+                            lucide.createIcons();
+                        }, 3000);
+                    },
+                    (error) => {
+                        alert("⚠️ GPS Uplink Failed. Please enable browser location permissions.");
+                        btn.innerHTML = originalIcon;
+                        lucide.createIcons();
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            } else {
+                alert("Geolocation tracking is not supported by your hardware.");
+                btn.innerHTML = originalIcon;
+                lucide.createIcons();
+            }
+        });
+
+        // --- Safe Places Data & Rendering ---
+        const safePlaces = [
+            { name: "Apollo Main Hospital", type: "Hospital", icon: "activity", lat: 13.0617, lng: 80.2483, threat: "LOW" },
+            { name: "St. Bede's Academy", type: "School", icon: "library", lat: 13.0333, lng: 80.2764, threat: "LOW" },
+            { name: "Anna University Grounds", type: "Open Ground", icon: "mountain", lat: 13.0102, lng: 80.2355, threat: "SAFE" },
+            { name: "Fortis Malar Emergency", type: "Hospital", icon: "activity", lat: 13.0083, lng: 80.2581, threat: "LOW" },
+            { name: "Kendriya Vidyalaya IIT", type: "School", icon: "library", lat: 12.9918, lng: 80.2341, threat: "SAFE" },
+            { name: "Guindy National Park Edge", type: "Open Ground", icon: "mountain", lat: 13.0033, lng: 80.2230, threat: "SAFE" }
+        ];
+
+        function getDistance(lat1, lon1, lat2, lon2) {
+            // Rough haversine approximation for short distances in km
+            const p = 0.017453292519943295;
+            const c = Math.cos;
+            const a = 0.5 - c((lat2 - lat1) * p)/2 + 
+                    c(lat1 * p) * c(lat2 * p) * 
+                    (1 - c((lon2 - lon1) * p))/2;
+            return 12742 * Math.asin(Math.sqrt(a)); 
+        }
+
+        function generatePlacesList() {
+            const val = document.getElementById('route-location-input').value;
+            if (!val) return alert("Please acquire a GPS lock using the crosshair button first.");
+
+            const parts = val.split(',');
+            const userLat = parseFloat(parts[0]);
+            const userLng = parseFloat(parts[1]);
+
+            if (isNaN(userLat) || isNaN(userLng)) return alert("Invalid GPS format.");
+
+            // Calculate exact distances & sort
+            const placesWithDist = safePlaces.map(p => {
+                return { ...p, dist: getDistance(userLat, userLng, p.lat, p.lng) };
+            });
+            placesWithDist.sort((a, b) => a.dist - b.dist);
+
+            // Display top 4 locations
+            const listContainer = document.getElementById('route-steps');
+            listContainer.innerHTML = '';
+            
+            const topPlaces = placesWithDist.slice(0, 4);
+
+            topPlaces.forEach(p => {
+                const navLink = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${p.lat},${p.lng}&travelmode=driving`;
+                
+                const card = document.createElement('div');
+                card.style.cssText = "background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;";
+                
+                card.innerHTML = `
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:0.75rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:1px; display:flex; gap:5px; align-items:center;">
+                                <i data-lucide="${p.icon}" size="14"></i> ${p.type}
+                            </span>
+                            <span style="font-size:0.7rem; background:rgba(34, 197, 94, 0.2); color:var(--safe-green); padding:2px 8px; border-radius:10px; font-weight:700;">
+                                ${p.dist.toFixed(1)} km away
+                            </span>
+                        </div>
+                        <h4 style="margin-top:10px; font-size:1.1rem; font-weight:700;">${p.name}</h4>
+                    </div>
+                    
+                    <a href="${navLink}" target="_blank" style="text-decoration:none; margin-top:20px; background:var(--accent-blue); padding:12px; border-radius:10px; text-align:center; color:white; font-weight:600; display:flex; align-items:center; justify-content:center; gap:8px; transition:0.3s; box-shadow:0 0 15px rgba(59,130,246,0.3);">
+                        <i data-lucide="navigation"></i> Navigate Now
+                    </a>
+                `;
+                
+                listContainer.appendChild(card);
+            });
+            
+            lucide.createIcons();
+        }
+    </script>
 </body>
 </html>
